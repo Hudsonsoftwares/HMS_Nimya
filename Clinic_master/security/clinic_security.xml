@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Module Category -->
+        <record id="module_category_hms" model="ir.module.category">
+            <field name="name">Hospital Management</field>
+            <field name="description">Access rights for Hospital Management System</field>
+            <field name="sequence">10</field>
+        </record>
+
+        <!-- Receptionist Group -->
+        <record id="group_hms_receptionist" model="res.groups">
+            <field name="name">Receptionist</field>
+            <field name="category_id" ref="module_category_hms"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <!-- Administrator Group -->
+        <record id="group_hms_admin" model="res.groups">
+            <field name="name">Administrator</field>
+            <field name="category_id" ref="module_category_hms"/>
+            <field name="implied_ids" eval="[(4, ref('group_hms_receptionist'))]"/>
+            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        </record>
+    </data>
+</odoo>

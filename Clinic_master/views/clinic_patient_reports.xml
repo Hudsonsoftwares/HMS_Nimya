@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Report Action -->
+    <record id="action_report_clinic_patient_card" model="ir.actions.report">
+        <field name="name">Patient Card</field>
+        <field name="model">clinic.patient</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">Clinic_master.report_clinic_patient_card</field>
+        <field name="report_file">Clinic_master.report_clinic_patient_card</field>
+        <field name="print_report_name">'Patient Card - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_clinic_patient"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Report Template -->
+    <template id="report_clinic_patient_card">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Patient Medical Card</h2>
+                        <div class="row mt32 mb32">
+                            <div class="col-3">
+                                <strong>Patient ID:</strong>
+                                <p t-field="doc.patient_id"/>
+                            </div>
+                            <div class="col-3">
+                                <strong>Name:</strong>
+                                <p t-field="doc.name"/>
+                            </div>
+                            <div class="col-3">
+                                <strong>Gender:</strong>
+                                <p t-field="doc.gender"/>
+                            </div>
+                            <div class="col-3">
+                                <strong>Age:</strong>
+                                <p t-field="doc.age"/>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

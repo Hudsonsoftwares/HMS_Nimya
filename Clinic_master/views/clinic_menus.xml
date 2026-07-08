@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Root Menu -->
+    <menuitem id="menu_clinic_root"
+              name="Clinic Management"
+              web_icon="Clinic_master,static/description/icon.png"
+              sequence="10"/>
+
+    <!-- Patients Menu (under Root) -->
+    <menuitem id="menu_clinic_patient_parent"
+              name="Patients"
+              parent="menu_clinic_root"
+              sequence="10"/>
+
+    <menuitem id="menu_clinic_patient"
+              name="Patients"
+              parent="menu_clinic_patient_parent"
+              action="action_clinic_patient"
+              sequence="10"/>
+
+    <!-- Configuration Menu (under Root) -->
+    <menuitem id="menu_clinic_config"
+              name="Configuration"
+              parent="menu_clinic_root"
+              groups="Clinic_master.group_hms_admin"
+              sequence="100"/>
+
+    <!-- Config submenus -->
+    <menuitem id="menu_clinic_patient_category"
+              name="Patient Categories"
+              parent="menu_clinic_config"
+              action="action_clinic_patient_category"
+              sequence="10"/>
+
+    <menuitem id="menu_clinic_blood_group"
+              name="Blood Groups"
+              parent="menu_clinic_config"
+              action="action_clinic_blood_group"
+              sequence="20"/>
+
+    <menuitem id="menu_clinic_relationship_type"
+              name="Relationship Types"
+              parent="menu_clinic_config"
+              action="action_clinic_relationship_type"
+              sequence="30"/>
+</odoo>

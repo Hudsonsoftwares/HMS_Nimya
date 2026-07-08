@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Blood Groups -->
+        <record id="bg_a_pos" model="clinic.blood.group">
+            <field name="name">A+</field>
+        </record>
+        <record id="bg_a_neg" model="clinic.blood.group">
+            <field name="name">A-</field>
+        </record>
+        <record id="bg_b_pos" model="clinic.blood.group">
+            <field name="name">B+</field>
+        </record>
+        <record id="bg_b_neg" model="clinic.blood.group">
+            <field name="name">B-</field>
+        </record>
+        <record id="bg_ab_pos" model="clinic.blood.group">
+            <field name="name">AB+</field>
+        </record>
+        <record id="bg_ab_neg" model="clinic.blood.group">
+            <field name="name">AB-</field>
+        </record>
+        <record id="bg_o_pos" model="clinic.blood.group">
+            <field name="name">O+</field>
+        </record>
+        <record id="bg_o_neg" model="clinic.blood.group">
+            <field name="name">O-</field>
+        </record>
+
+        <!-- Relationship Types -->
+        <record id="rel_father" model="clinic.relationship.type">
+            <field name="name">Father</field>
+        </record>
+        <record id="rel_mother" model="clinic.relationship.type">
+            <field name="name">Mother</field>
+        </record>
+        <record id="rel_brother" model="clinic.relationship.type">
+            <field name="name">Brother</field>
+        </record>
+        <record id="rel_sister" model="clinic.relationship.type">
+            <field name="name">Sister</field>
+        </record>
+        <record id="rel_husband" model="clinic.relationship.type">
+            <field name="name">Husband</field>
+        </record>
+        <record id="rel_wife" model="clinic.relationship.type">
+            <field name="name">Wife</field>
+        </record>
+        <record id="rel_guardian" model="clinic.relationship.type">
+            <field name="name">Guardian</field>
+        </record>
+        <record id="rel_friend" model="clinic.relationship.type">
+            <field name="name">Friend</field>
+        </record>
+
+        <!-- Default Insurance Providers -->
+        <record id="ins_blue_cross" model="clinic.insurance.provider">
+            <field name="name">Blue Cross</field>
+        </record>
+        <record id="ins_aetna" model="clinic.insurance.provider">
+            <field name="name">Aetna</field>
+        </record>
+        <record id="ins_cigna" model="clinic.insurance.provider">
+            <field name="name">Cigna</field>
+        </record>
+        <record id="ins_united_health" model="clinic.insurance.provider">
+            <field name="name">UnitedHealth</field>
+        </record>
+        <record id="ins_allianz" model="clinic.insurance.provider">
+            <field name="name">Allianz</field>
+        </record>
+    </data>
+</odoo>

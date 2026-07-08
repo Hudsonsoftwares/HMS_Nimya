@@ -1,0 +1,21 @@
+{
+    'name': 'Patients',
+    'version': '18.0.1.0.0',
+    'category': 'Healthcare',
+    'summary': 'Hospital Management System - Patient Registration',
+    'author': 'Hudson Software Solutions',
+    'depends': ['base', 'contacts'],
+    'data': [
+        'security/clinic_security.xml',
+        'security/ir.model.access.csv',
+        'data/clinic_sequence.xml',
+        'data/clinic_data.xml',
+        'views/clinic_patient_views.xml',
+        'views/clinic_config_views.xml',
+        'views/clinic_patient_reports.xml',
+        'views/clinic_menus.xml',
+    ],
+    'installable': True,
+    'application': True,
+    'license': 'LGPL-3',
+}

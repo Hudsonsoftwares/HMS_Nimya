@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form View -->
+    <record id="view_insurance_provider_form" model="ir.ui.view">
+        <field name="name">clinic.insurance.provider.form</field>
+        <field name="model">clinic.insurance.provider</field>
+        <field name="arch" type="xml">
+            <form string="Insurance Provider">
+                <header>
+                    <field name="status" widget="statusbar" statusbar_visible="active,inactive" options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. QLM Insurance"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group name="basic_info" string="Basic Information">
+                            <field name="code"/>
+                            <field name="company_type" widget="radio" options="{'horizontal': true}"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Contact Information" name="contact_info">
+                            <group>
+                                <group string="Primary Contact">
+                                    <field name="contact_person" placeholder="e.g. John Doe"/>
+                                    <field name="designation" placeholder="e.g. Operations Manager"/>
+                                </group>
+                                <group string="Communication Details">
+                                    <field name="email" widget="email"/>
+                                    <field name="phone" widget="phone"/>
+                                    <field name="mobile" widget="phone"/>
+                                    <field name="website" widget="url" placeholder="e.g. https://www.qlm.com.qa"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Address Details" name="address_details">
+                            <group>
+                                <group string="Street Address">
+                                    <field name="building" placeholder="Building Name / Number"/>
+                                    <field name="street" placeholder="Street Name"/>
+                                </group>
+                                <group string="Region / Country">
+                                    <field name="city" placeholder="e.g. Doha"/>
+                                    <field name="state" placeholder="e.g. West Bay"/>
+                                    <field name="country_id" options="{'no_open': True, 'no_create': True}"/>
+                                    <field name="postal_code" placeholder="Postal Code / P.O. Box"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Business Details" name="business_details">
+                            <group>
+                                <group string="Registration &amp; Tax">
+                                    <field name="registration_number" placeholder="Commercial Registration (CR) No."/>
+                                    <field name="tax_number" placeholder="Tax Card Number"/>
+                                </group>
+                                <group string="Contract &amp; Settlement">
+                                    <field name="contract_start_date"/>
+                                    <field name="contract_end_date"/>
+                                    <field name="currency_id" options="{'no_open': True, 'no_create': True}"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Claim &amp; Authorization" name="claim_auth">
+                            <group>
+                                <group string="Pre-Authorization">
+                                    <field name="requires_pre_auth"/>
+                                    <field name="pre_auth_email" widget="email" placeholder="preauth@company.com" invisible="not requires_pre_auth"/>
+                                </group>
+                                <group string="Claims &amp; Support">
+                                    <field name="claims_email" widget="email" placeholder="claims@company.com"/>
+                                    <field name="claims_portal_url" widget="url" placeholder="e.g. https://portal.company.com"/>
+                                    <field name="customer_support_number" widget="phone"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Internal Notes" name="internal_notes">
+                            <field name="internal_notes" placeholder="Add internal notes about contract exceptions, SLA agreements, or portal instructions..." widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree/List View -->
+    <record id="view_insurance_provider_tree" model="ir.ui.view">
+        <field name="name">clinic.insurance.provider.tree</field>
+        <field name="model">clinic.insurance.provider</field>
+        <field name="arch" type="xml">
+            <list string="Insurance Providers">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="company_type" widget="badge" decoration-info="company_type == 'insurance'" decoration-warning="company_type == 'tpa'"/>
+                <field name="contact_person"/>
+                <field name="phone"/>
+                <field name="email"/>
+                <field name="requires_pre_auth" string="Pre-Auth Required" widget="boolean_toggle"/>
+                <field name="status" decoration-success="status == 'active'" decoration-danger="status == 'inactive'" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_insurance_provider_search" model="ir.ui.view">
+        <field name="name">clinic.insurance.provider.search</field>
+        <field name="model">clinic.insurance.provider</field>
+        <field name="arch" type="xml">
+            <search string="Search Insurance Providers">
+                <field name="name" string="Provider" filter_domain="['|', '|', ('name', 'ilike', self), ('code', 'ilike', self), ('contact_person', 'ilike', self)]"/>
+                <field name="code"/>
+                <field name="company_type"/>
+                <field name="contact_person"/>
+                <separator/>
+                <filter string="Active" name="active" domain="[('status', '=', 'active')]"/>
+                <filter string="Inactive" name="inactive" domain="[('status', '=', 'inactive')]"/>
+                <separator/>
+                <filter string="Insurance Companies" name="type_insurance" domain="[('company_type', '=', 'insurance')]"/>
+                <filter string="TPAs" name="type_tpa" domain="[('company_type', '=', 'tpa')]"/>
+                <separator/>
+                <filter string="Requires Pre-Auth" name="req_pre_auth" domain="[('requires_pre_auth', '=', True)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Status" name="group_by_status" context="{'group_by': 'status'}"/>
+                    <filter string="Company Type" name="group_by_type" context="{'group_by': 'company_type'}"/>
+                    <filter string="Country" name="group_by_country" context="{'group_by': 'country_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_insurance_provider" model="ir.actions.act_window">
+        <field name="name">Insurance Providers</field>
+        <field name="res_model">clinic.insurance.provider</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_insurance_provider_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Insurance Provider
+            </p>
+            <p>
+                Manage details, contacts, addresses, business details, and claim settings for Qatar health insurance providers and TPAs.
+            </p>
+        </field>
+    </record>
+</odoo>

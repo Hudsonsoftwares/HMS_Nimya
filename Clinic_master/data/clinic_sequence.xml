@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_clinic_patient" model="ir.sequence">
+            <field name="name">Patient ID Sequence</field>
+            <field name="code">clinic.patient</field>
+            <field name="prefix">PAT</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
+    </data>
+</odoo>

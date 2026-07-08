@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Patient Category View -->
+    <record id="view_clinic_patient_category_tree" model="ir.ui.view">
+        <field name="name">clinic.patient.category.list</field>
+        <field name="model">clinic.patient.category</field>
+        <field name="arch" type="xml">
+            <list string="Patient Categories" editable="bottom">
+                <field name="name"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_clinic_patient_category" model="ir.actions.act_window">
+        <field name="name">Patient Categories</field>
+        <field name="res_model">clinic.patient.category</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- Blood Group View -->
+    <record id="view_clinic_blood_group_tree" model="ir.ui.view">
+        <field name="name">clinic.blood.group.list</field>
+        <field name="model">clinic.blood.group</field>
+        <field name="arch" type="xml">
+            <list string="Blood Groups" editable="bottom">
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_clinic_blood_group" model="ir.actions.act_window">
+        <field name="name">Blood Groups</field>
+        <field name="res_model">clinic.blood.group</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- Relationship Type View -->
+    <record id="view_clinic_relationship_type_tree" model="ir.ui.view">
+        <field name="name">clinic.relationship.type.list</field>
+        <field name="model">clinic.relationship.type</field>
+        <field name="arch" type="xml">
+            <list string="Relationship Types" editable="bottom">
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_clinic_relationship_type" model="ir.actions.act_window">
+        <field name="name">Relationship Types</field>
+        <field name="res_model">clinic.relationship.type</field>
+        <field name="view_mode">list</field>
+    </record>
+</odoo>
