@@ -10,15 +10,20 @@
                     <field name="status" widget="statusbar" statusbar_visible="active,inactive" options="{'clickable': '1'}"/>
                 </header>
                 <sheet>
+                    <field name="logo" widget="image" class="oe_avatar" options="{'zoom': true, 'preview_image': 'logo'}"/>
                     <div class="oe_title">
                         <label for="name" class="oe_edit_only"/>
                         <h1>
                             <field name="name" placeholder="e.g. QLM Insurance"/>
                         </h1>
+                        <div class="o_row">
+                            <field name="is_preferred"/>
+                            <label for="is_preferred" string="Preferred Insurance Partner"/>
+                        </div>
                     </div>
                     <group>
                         <group name="basic_info" string="Basic Information">
-                            <field name="code"/>
+                            <field name="code" readonly="1"/>
                             <field name="company_type" widget="radio" options="{'horizontal': true}"/>
                         </group>
                     </group>
@@ -28,13 +33,15 @@
                             <group>
                                 <group string="Primary Contact">
                                     <field name="contact_person" placeholder="e.g. John Doe"/>
+                                    <field name="contact_department"/>
                                     <field name="designation" placeholder="e.g. Operations Manager"/>
                                 </group>
-                                <group string="Communication Details">
+                                <group string="Communication &amp; Support">
                                     <field name="email" widget="email"/>
                                     <field name="phone" widget="phone"/>
                                     <field name="mobile" widget="phone"/>
                                     <field name="website" widget="url" placeholder="e.g. https://www.qlm.com.qa"/>
+                                    <field name="support_hours" placeholder="e.g. Sun–Thu, 8:00 AM – 5:00 PM"/>
                                 </group>
                             </group>
                         </page>
@@ -58,23 +65,39 @@
                                     <field name="registration_number" placeholder="Commercial Registration (CR) No."/>
                                     <field name="tax_number" placeholder="Tax Card Number"/>
                                 </group>
-                                <group string="Contract &amp; Settlement">
+                                <group string="Contract &amp; Operations">
                                     <field name="contract_start_date"/>
                                     <field name="contract_end_date"/>
                                     <field name="currency_id" options="{'no_open': True, 'no_create': True}"/>
+                                    <field name="network_type"/>
+                                    <field name="claims_processing_time"/>
                                 </group>
                             </group>
                         </page>
                         <page string="Claim &amp; Authorization" name="claim_auth">
                             <group>
-                                <group string="Pre-Authorization">
+                                <group string="Pre-Authorization" name="pre_auth_section">
                                     <field name="requires_pre_auth"/>
                                     <field name="pre_auth_email" widget="email" placeholder="preauth@company.com" invisible="not requires_pre_auth"/>
+                                    <field name="pre_auth_tat" invisible="not requires_pre_auth"/>
+                                    <field name="pre_auth_notes" placeholder="Specify pre-authorization rules, exceptions, etc." invisible="not requires_pre_auth"/>
                                 </group>
-                                <group string="Claims &amp; Support">
+                                <group string="Claims &amp; Support" name="claims_support_section">
                                     <field name="claims_email" widget="email" placeholder="claims@company.com"/>
                                     <field name="claims_portal_url" widget="url" placeholder="e.g. https://portal.company.com"/>
                                     <field name="customer_support_number" widget="phone"/>
+                                    <field name="working_hours" placeholder="e.g. Sun-Thu 8:00 AM - 5:00 PM"/>
+                                    <field name="emergency_contact_number" widget="phone" placeholder="Emergency contact number"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Verification Settings" name="verification_section">
+                                    <field name="verification_method" widget="radio" options="{'horizontal': true}"/>
+                                </group>
+                                <group string="Future API Integration" name="api_section">
+                                    <field name="api_available"/>
+                                    <field name="api_doc_url" widget="url" placeholder="e.g. https://api.company.com/docs" invisible="not api_available"/>
+                                    <field name="api_notes" placeholder="API access keys, sandbox credentials, or integration notes..." invisible="not api_available"/>
                                 </group>
                             </group>
                         </page>
@@ -93,13 +116,15 @@
         <field name="model">clinic.insurance.provider</field>
         <field name="arch" type="xml">
             <list string="Insurance Providers">
+                <field name="logo" widget="image" options="{'size': [32, 32]}" class="oe_avatar" string="Logo"/>
                 <field name="name"/>
                 <field name="code"/>
                 <field name="company_type" widget="badge" decoration-info="company_type == 'insurance'" decoration-warning="company_type == 'tpa'"/>
+                <field name="is_preferred" string="Preferred" widget="boolean_toggle"/>
                 <field name="contact_person"/>
                 <field name="phone"/>
                 <field name="email"/>
-                <field name="requires_pre_auth" string="Pre-Auth Required" widget="boolean_toggle"/>
+                <field name="requires_pre_auth" string="Pre-Auth" widget="boolean_toggle"/>
                 <field name="status" decoration-success="status == 'active'" decoration-danger="status == 'inactive'" widget="badge"/>
             </list>
         </field>
@@ -115,6 +140,8 @@
                 <field name="code"/>
                 <field name="company_type"/>
                 <field name="contact_person"/>
+                <separator/>
+                <filter string="Preferred Partners" name="preferred" domain="[('is_preferred', '=', True)]"/>
                 <separator/>
                 <filter string="Active" name="active" domain="[('status', '=', 'active')]"/>
                 <filter string="Inactive" name="inactive" domain="[('status', '=', 'inactive')]"/>

@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <delete model="ir.ui.menu" search="[('name', '=', 'Insurance Providers'), ('parent_id', '=', ref('Clinic_master.menu_clinic_config'))]"/>
+    <delete model="ir.actions.act_window" search="[('name', '=', 'Insurance Providers'), ('res_model', '=', 'clinic.insurance.provider')]"/>
+    <delete model="ir.ui.view" search="[('name', '=', 'clinic.insurance.provider.list'), ('model', '=', 'clinic.insurance.provider')]"/>
+
     <!-- Patient Category View -->
     <record id="view_clinic_patient_category_tree" model="ir.ui.view">
         <field name="name">clinic.patient.category.list</field>
