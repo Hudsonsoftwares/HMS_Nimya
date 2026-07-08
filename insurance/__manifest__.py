@@ -13,8 +13,11 @@
     ],
 
     'data': [
+        'security/insurance_security.xml',
+        'security/ir.model.access.csv',
         'data/insurance_sequence.xml',
         'views/clinic_insurance_provider_views.xml',
+        'views/insurance_policy_views.xml',
         'views/insurance_menu.xml',
     ],
 

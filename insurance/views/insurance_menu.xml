@@ -13,4 +13,11 @@
         action="action_insurance_provider"
         sequence="10"/>
 
+    <menuitem
+        id="insurance_policy_menu"
+        name="Insurance Policies"
+        parent="insurance_root_menu"
+        action="action_insurance_policy"
+        sequence="20"/>
+
 </odoo>

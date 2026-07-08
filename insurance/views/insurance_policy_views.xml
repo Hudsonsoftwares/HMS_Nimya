@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form View -->
+    <record id="view_insurance_policy_form" model="ir.ui.view">
+        <field name="name">insurance.policy.form</field>
+        <field name="model">insurance.policy</field>
+        <field name="arch" type="xml">
+            <form string="Insurance Policy">
+                <header>
+                    <field name="status" widget="statusbar" statusbar_visible="active,inactive" options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Gold Plan"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="provider_id" options="{'no_create_edit': True, 'no_quick_create': True}"/>
+                            <field name="code" placeholder="e.g. POL-G01"/>
+                        </group>
+                        <group>
+                            <field name="policy_type"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="General Information" name="general_info">
+                            <group>
+                                <group string="Format &amp; Validation">
+                                    <field name="policy_number_format" placeholder="e.g. POL-######"/>
+                                </group>
+                                <group string="Details">
+                                    <field name="description" placeholder="Provide general description about the policy..."/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Coverage Information" name="coverage_info">
+                            <group>
+                                <group string="Coverage Parameters">
+                                    <field name="coverage_type"/>
+                                    <field name="annual_limit"/>
+                                </group>
+                                <group string="Co-payment">
+                                    <field name="copay_percentage" placeholder="e.g. 20.0"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Verification Settings" name="verification_settings">
+                            <group>
+                                <group string="Default Verification">
+                                    <field name="verification_method"/>
+                                </group>
+                                <group string="Approval Settings">
+                                    <field name="requires_pre_auth"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Validity" name="validity">
+                            <group>
+                                <group string="Date Range">
+                                    <field name="valid_from"/>
+                                    <field name="valid_until"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="remarks" placeholder="Add additional remarks or notes for the insurance executive..." widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree/List View -->
+    <record id="view_insurance_policy_tree" model="ir.ui.view">
+        <field name="name">insurance.policy.tree</field>
+        <field name="model">insurance.policy</field>
+        <field name="arch" type="xml">
+            <list string="Insurance Policies">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="provider_id"/>
+                <field name="policy_type" widget="badge" decoration-info="policy_type == 'corporate'" decoration-success="policy_type == 'government'"/>
+                <field name="coverage_type" widget="badge"/>
+                <field name="requires_pre_auth" string="Pre-Auth Required" widget="boolean_toggle"/>
+                <field name="copay_percentage" string="Copay %"/>
+                <field name="annual_limit" string="Annual Limit"/>
+                <field name="status" decoration-success="status == 'active'" decoration-danger="status == 'inactive'" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_insurance_policy_search" model="ir.ui.view">
+        <field name="name">insurance.policy.search</field>
+        <field name="model">insurance.policy</field>
+        <field name="arch" type="xml">
+            <search string="Search Insurance Policies">
+                <field name="name" string="Policy" filter_domain="['|', ('name', 'ilike', self), ('code', 'ilike', self)]"/>
+                <field name="code"/>
+                <field name="provider_id"/>
+                <separator/>
+                <filter string="Active Policies" name="active" domain="[('status', '=', 'active')]"/>
+                <filter string="Inactive Policies" name="inactive" domain="[('status', '=', 'inactive')]"/>
+                <separator/>
+                <filter string="Pre-Auth Required" name="pre_auth_req" domain="[('requires_pre_auth', '=', True)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Insurance Provider" name="group_by_provider" context="{'group_by': 'provider_id'}"/>
+                    <filter string="Coverage Type" name="group_by_coverage" context="{'group_by': 'coverage_type'}"/>
+                    <filter string="Policy Type" name="group_by_type" context="{'group_by': 'policy_type'}"/>
+                    <filter string="Status" name="group_by_status" context="{'group_by': 'status'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_insurance_policy" model="ir.actions.act_window">
+        <field name="name">Insurance Policies</field>
+        <field name="res_model">insurance.policy</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_insurance_policy_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Insurance Policy / Plan
+            </p>
+            <p>
+                Define different plans offered by insurance providers (e.g. Gold, Silver, Platinum) along with coverage limits and copay requirements.
+            </p>
+        </field>
+    </record>
+</odoo>

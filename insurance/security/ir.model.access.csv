@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_insurance_policy_executive,insurance.policy.executive,model_insurance_policy,group_insurance_executive,1,1,1,0
+access_insurance_policy_manager,insurance.policy.manager,model_insurance_policy,group_insurance_manager,1,1,1,1
+access_insurance_provider_executive,clinic.insurance.provider.executive,Clinic_master.model_clinic_insurance_provider,group_insurance_executive,1,0,0,0
+access_insurance_provider_manager,clinic.insurance.provider.manager,Clinic_master.model_clinic_insurance_provider,group_insurance_manager,1,1,1,1
