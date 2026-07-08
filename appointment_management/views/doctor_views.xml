@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Doctor Schedule List View -->
+    <record id="view_doctor_schedule_list" model="ir.ui.view">
+        <field name="name">doctor.schedule.list</field>
+        <field name="model">doctor.schedule</field>
+        <field name="arch" type="xml">
+            <list string="Doctor working schedules">
+                <field name="doctor_id"/>
+                <field name="mon" widget="boolean_toggle"/>
+                <field name="tue" widget="boolean_toggle"/>
+                <field name="wed" widget="boolean_toggle"/>
+                <field name="thu" widget="boolean_toggle"/>
+                <field name="fri" widget="boolean_toggle"/>
+                <field name="sat" widget="boolean_toggle"/>
+                <field name="sun" widget="boolean_toggle"/>
+                <field name="work_start_time" widget="float_time"/>
+                <field name="work_end_time" widget="float_time"/>
+                <field name="max_patients"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Doctor Schedule Form View -->
+    <record id="view_doctor_schedule_form" model="ir.ui.view">
+        <field name="name">doctor.schedule.form</field>
+        <field name="model">doctor.schedule</field>
+        <field name="arch" type="xml">
+            <form string="Doctor working schedule">
+                <sheet>
+                    <group>
+                        <group string="Doctor Specifications">
+                            <field name="doctor_id"/>
+                            <field name="max_patients"/>
+                            <field name="consultation_duration"/>
+                        </group>
+                        <group string="Working Days">
+                            <label for="mon" string="Working Weekdays"/>
+                            <div class="o_row">
+                                <field name="mon"/><span class="me-2">Mon</span>
+                                <field name="tue"/><span class="me-2">Tue</span>
+                                <field name="wed"/><span class="me-2">Wed</span>
+                                <field name="thu"/><span class="me-2">Thu</span>
+                                <field name="fri"/><span class="me-2">Fri</span>
+                                <field name="sat"/><span class="me-2">Sat</span>
+                                <field name="sun"/><span>Sun</span>
+                            </div>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Working Hours">
+                            <field name="work_start_time" widget="float_time"/>
+                            <field name="work_end_time" widget="float_time"/>
+                        </group>
+                        <group string="Break Hours">
+                            <field name="break_start_time" widget="float_time"/>
+                            <field name="break_end_time" widget="float_time"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Doctor Unavailability List View -->
+    <record id="view_doctor_unavailability_list" model="ir.ui.view">
+        <field name="name">doctor.unavailability.list</field>
+        <field name="model">doctor.unavailability</field>
+        <field name="arch" type="xml">
+            <list string="Doctor Unavailabilities">
+                <field name="doctor_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="reason"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Doctor Unavailability Form View -->
+    <record id="view_doctor_unavailability_form" model="ir.ui.view">
+        <field name="name">doctor.unavailability.form</field>
+        <field name="model">doctor.unavailability</field>
+        <field name="arch" type="xml">
+            <form string="Doctor Leave / Unavailability">
+                <sheet>
+                    <group>
+                        <field name="doctor_id"/>
+                        <field name="start_date"/>
+                        <field name="end_date"/>
+                        <field name="reason"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_doctor_schedule" model="ir.actions.act_window">
+        <field name="name">Doctor Schedules</field>
+        <field name="res_model">doctor.schedule</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Define the first Doctor Schedule!
+            </p>
+        </field>
+    </record>
+
+    <record id="action_doctor_unavailability" model="ir.actions.act_window">
+        <field name="name">Doctor Leaves / Unavailability</field>
+        <field name="res_model">doctor.unavailability</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Record the first doctor unavailability/leave date range!
+            </p>
+        </field>
+    </record>
+
+    <!-- Configuration Menu -->
+    <menuitem id="menu_appointment_configuration"
+              name="Configuration"
+              parent="menu_hospital_appointment_root"
+              sequence="100"/>
+
+    <menuitem id="menu_doctor_schedule"
+              name="Doctor Schedules"
+              parent="menu_appointment_configuration"
+              action="action_doctor_schedule"
+              sequence="10"/>
+
+    <menuitem id="menu_doctor_unavailability"
+              name="Doctor Leaves / Unavailability"
+              parent="menu_appointment_configuration"
+              action="action_doctor_unavailability"
+              sequence="20"/>
+</odoo>

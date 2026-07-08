@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hospital_appointment_receptionist,hospital.appointment.receptionist,model_hospital_appointment,Clinic_master.group_hms_receptionist,1,1,1,0
+access_hospital_appointment_admin,hospital.appointment.admin,model_hospital_appointment,Clinic_master.group_hms_admin,1,1,1,1
+access_doctor_schedule_receptionist,doctor.schedule.receptionist,model_doctor_schedule,Clinic_master.group_hms_receptionist,1,1,1,0
+access_doctor_schedule_admin,doctor.schedule.admin,model_doctor_schedule,Clinic_master.group_hms_admin,1,1,1,1
+access_doctor_unavailability_receptionist,doctor.unavailability.receptionist,model_doctor_unavailability,Clinic_master.group_hms_receptionist,1,1,1,0
+access_doctor_unavailability_admin,doctor.unavailability.admin,model_doctor_unavailability,Clinic_master.group_hms_admin,1,1,1,1
+access_appointment_dashboard_receptionist,appointment.dashboard.receptionist,model_appointment_dashboard,Clinic_master.group_hms_receptionist,1,1,1,1
+access_appointment_dashboard_admin,appointment.dashboard.admin,model_appointment_dashboard,Clinic_master.group_hms_admin,1,1,1,1

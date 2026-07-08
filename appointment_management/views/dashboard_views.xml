@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Dashboard Form View -->
+    <record id="view_appointment_dashboard_form" model="ir.ui.view">
+        <field name="name">appointment.dashboard.form</field>
+        <field name="model">appointment.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="Clinic Dashboard" create="false" edit="false" delete="false">
+                <sheet>
+                    <div style="font-size: 26px; font-weight: bold; color: #1e293b; margin-bottom: 25px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                        <span>Clinic Dashboard</span>
+                        <button name="action_open_appointments" type="object" string="View All Appointments" class="btn btn-primary btn-sm"/>
+                    </div>
+
+                    <!-- KPI Cards Row 1 -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; justify-content: space-between;">
+                        <!-- Card 1: Today's Appointments -->
+                        <div style="flex: 1; min-width: 220px; background: #e0f2fe; border-left: 5px solid #0284c7; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 13px; font-weight: bold; color: #0369a1; text-transform: uppercase;">Today's Appointments</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #0284c7; margin-top: 5px;"><field name="today_appointments"/></div>
+                        </div>
+                        <!-- Card 2: Waiting Patients -->
+                        <div style="flex: 1; min-width: 220px; background: #fef3c7; border-left: 5px solid #d97706; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 13px; font-weight: bold; color: #b45309; text-transform: uppercase;">Waiting Patients</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #d97706; margin-top: 5px;"><field name="waiting_patients"/></div>
+                        </div>
+                        <!-- Card 3: Consultation -->
+                        <div style="flex: 1; min-width: 220px; background: #f3e8ff; border-left: 5px solid #9333ea; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 13px; font-weight: bold; color: #6b21a8; text-transform: uppercase;">In Consultation</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #9333ea; margin-top: 5px;"><field name="consultation_patients"/></div>
+                        </div>
+                    </div>
+
+                    <!-- KPI Cards Row 2 -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; justify-content: space-between;">
+                        <!-- Card 4: Completed -->
+                        <div style="flex: 1; min-width: 220px; background: #dcfce7; border-left: 5px solid #16a34a; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 13px; font-weight: bold; color: #15803d; text-transform: uppercase;">Completed Visits</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #16a34a; margin-top: 5px;"><field name="completed_appointments"/></div>
+                        </div>
+                        <!-- Card 5: Cancelled -->
+                        <div style="flex: 1; min-width: 220px; background: #fee2e2; border-left: 5px solid #dc2626; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 13px; font-weight: bold; color: #991b1b; text-transform: uppercase;">Cancelled / No Show</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #dc2626; margin-top: 5px;"><field name="cancelled_appointments"/></div>
+                        </div>
+                        <!-- Card 6: Available Doctors -->
+                        <div style="flex: 1; min-width: 220px; background: #ccfbf1; border-left: 5px solid #0d9488; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 13px; font-weight: bold; color: #0f766e; text-transform: uppercase;">Active Doctors</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #0d9488; margin-top: 5px;"><field name="available_doctors"/></div>
+                        </div>
+                    </div>
+
+                    <!-- KPI Cards Row 3 -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 30px; justify-content: space-between;">
+                        <!-- Card 7: Avg Waiting Time -->
+                        <div style="flex: 1; min-width: 220px; background: #ffedd5; border-left: 5px solid #ea580c; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 13px; font-weight: bold; color: #c2410c; text-transform: uppercase;">Avg Waiting Time</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #ea580c; margin-top: 5px;"><field name="avg_waiting_time"/></div>
+                        </div>
+                        <!-- Card 8: Follow-up -->
+                        <div style="flex: 1; min-width: 220px; background: #f1f5f9; border-left: 5px solid #475569; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 13px; font-weight: bold; color: #334155; text-transform: uppercase;">Follow-up Visits</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #475569; margin-top: 5px;"><field name="followup_appointments"/></div>
+                        </div>
+                        <!-- Card 9: Emergency -->
+                        <div style="flex: 1; min-width: 220px; background: #ffe4e6; border-left: 5px solid #e11d48; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 13px; font-weight: bold; color: #be123c; text-transform: uppercase;">Emergency Visits</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #e11d48; margin-top: 5px;"><field name="emergency_appointments"/></div>
+                        </div>
+                    </div>
+
+                    <!-- Tabs/Lists section -->
+                    <notebook>
+                        <page string="Today's Active Queue" name="today_queue_tab">
+                            <field name="today_queue_ids" readonly="1">
+                                <list create="false" edit="false" delete="false">
+                                    <field name="token_number" decoration-bf="1"/>
+                                    <field name="patient_id"/>
+                                    <field name="patient_name"/>
+                                    <field name="doctor_id" widget="many2one_avatar"/>
+                                    <field name="state" widget="badge" decoration-warning="state == 'waiting'" decoration-purple="state == 'consultation'"/>
+                                    <field name="arrival_time"/>
+                                    <field name="waiting_time_str" string="Time in Queue"/>
+                                    <field name="estimated_consultation_time" string="Est. Appointment Time"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Upcoming Scheduled Appointments" name="upcoming_tab">
+                            <field name="upcoming_appointment_ids" readonly="1">
+                                <list create="false" edit="false" delete="false">
+                                    <field name="name"/>
+                                    <field name="appointment_date"/>
+                                    <field name="appointment_time" widget="float_time"/>
+                                    <field name="patient_id"/>
+                                    <field name="doctor_id" widget="many2one_avatar"/>
+                                    <field name="visit_type" widget="badge"/>
+                                    <field name="priority" widget="badge" decoration-danger="priority == 'emergency'" decoration-warning="priority == 'urgent'"/>
+                                    <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'confirmed'"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Recent Checkout Logs" name="recent_tab">
+                            <field name="recent_appointment_ids" readonly="1">
+                                <list create="false" edit="false" delete="false">
+                                    <field name="name"/>
+                                    <field name="appointment_date"/>
+                                    <field name="patient_id"/>
+                                    <field name="doctor_id"/>
+                                    <field name="state" widget="badge" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>
+                                    <field name="write_date" string="Completed At"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Dashboard Action -->
+    <record id="action_appointment_dashboard_server" model="ir.actions.server">
+        <field name="name">Clinic Dashboard</field>
+        <field name="model_id" ref="model_appointment_dashboard"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.action_open_dashboard()
+        </field>
+    </record>
+
+    <!-- Root Menu -->
+    <menuitem id="menu_hospital_appointment_root"
+              name="Appointment Management"
+              web_icon="appointment_management,static/description/icon.png"
+              sequence="20"/>
+
+    <!-- Dashboard Menu -->
+    <menuitem id="menu_appointment_dashboard"
+              name="Dashboard"
+              parent="menu_hospital_appointment_root"
+              action="action_appointment_dashboard_server"
+              sequence="1"/>
+</odoo>
