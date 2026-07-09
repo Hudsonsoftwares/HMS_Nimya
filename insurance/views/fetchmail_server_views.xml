@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_email_server_form_inherit_imap" model="ir.ui.view">
+        <field name="name">fetchmail.server.form.inherit.imap</field>
+        <field name="model">fetchmail.server</field>
+        <field name="inherit_id" ref="mail.view_email_server_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='password']" position="after">
+                <field name="imap_folder" readonly="state != 'draft'" placeholder="INBOX" invisible="server_type != 'imap'"/>
+                <field name="imap_search_criteria" readonly="state != 'draft'" placeholder="(UNSEEN)" invisible="server_type != 'imap'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

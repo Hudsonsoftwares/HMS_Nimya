@@ -293,11 +293,21 @@ class InsuranceCase(models.Model):
         
         from odoo.tools import html2plaintext
         chatter_history = []
-        for msg in self.message_ids.sorted(key=lambda m: m.date):
+        # Sort messages and limit to the last 5 to keep within token limits
+        messages = self.message_ids.sorted(key=lambda m: m.date)
+        if len(messages) > 5:
+            messages = messages[-5:]
+            
+        for msg in messages:
             author = msg.author_id.name or "User/System"
             body = html2plaintext(msg.body or '').strip()
             if body:
-                chatter_history.append(f"{author}: {body}")
+                # Strip nested reply history to avoid token limits
+                for marker in ["On Thu,", "On Fri,", "On Sat,", "On Sun,", "On Mon,", "On Tue,", "On Wed,", "-----Original Message-----", "From:"]:
+                    if marker in body:
+                        body = body.split(marker)[0].strip()
+                if body:
+                    chatter_history.append(f"{author}: {body}")
         
         if not chatter_history:
             return
@@ -309,10 +319,26 @@ class InsuranceCase(models.Model):
             "Content-Type": "application/json"
         }
         prompt = (
-            "Analyze the following communication history for an insurance verification case. "
-            "Identify the latest status, whether the insurance covers the patient's visit, any copay/coverage percentages mentioned, "
-            "and any pre-authorization requirements or approvals. Provide a concise summary (max 3-4 sentences) "
-            "suitable for doctors and pharmacists to understand the insurance status immediately.\n\n"
+            "Analyze the following communication history for an insurance verification case.\n"
+            "Provide a highly detailed, structured summary of the insurance coverage status. "
+            "You MUST extract and list every single laboratory test and medicine mentioned in the communication, showing their specific coverage status and limits.\n\n"
+            "Format your response EXACTLY using the following markdown sections:\n\n"
+            "### 1. Overall Status & Consultation\n"
+            "- **Status**: (e.g. Approved / Pending / Excluded)\n"
+            "- **Copayment**: (e.g. 20% payable by member)\n"
+            "- **Consultation**: (Details of General Physician / Specialist coverage)\n\n"
+            "### 2. Detailed Laboratory Tests Coverage\n"
+            "List every laboratory test mentioned in the email (e.g., CBC, Blood Sugar, HbA1c, Lipid Profile, Liver/Kidney tests, Vitamin D, Vitamin B12, Iron Profile, etc.) with its specific coverage and conditions/frequency limits:\n"
+            "- **[Test Name]**: (Covered / Not Covered) - [Specific conditions/frequency limits/exclusions]\n\n"
+            "### 3. Detailed Pharmacy & Medicines Coverage\n"
+            "List every medicine category and quantity limits mentioned in the email:\n"
+            "- **[Medicine Category/Name]**: (Covered / Not Covered) - [Limits/frequency/restrictions]\n\n"
+            "### 4. Radiology & Other Services\n"
+            "- **[Service/Investigation]**: (Covered / Not Covered) - [Approval/Authorisation requirements]\n\n"
+            "### 5. Pre-Authorization & Exclusions\n"
+            "- **Pre-Authorization Required**: [List of services requiring prior approval]\n"
+            "- **Exclusions**: [List of excluded services/network conditions]\n\n"
+            "Do not omit any details or group tests/medicines together. Keep the listing highly specific as provided in the email reply.\n\n"
             f"Communication History:\n{history_text}"
         )
         payload = {

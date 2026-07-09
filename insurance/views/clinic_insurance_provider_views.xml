@@ -25,6 +25,7 @@
                         <group name="basic_info" string="Basic Information">
                             <field name="code" readonly="1"/>
                             <field name="company_type" widget="radio" options="{'horizontal': true}"/>
+                            <field name="partner_id" readonly="1"/>
                         </group>
                     </group>
                     

@@ -9,6 +9,11 @@ class ClinicInsuranceProvider(models.Model):
         max_width=128,
         max_height=128,
     )
+    partner_id = fields.Many2one(
+        comodel_name='res.partner',
+        string='Contact Reference',
+        ondelete='restrict',
+    )
     code = fields.Char(
         string='Provider Code',
         required=True,
@@ -141,4 +146,67 @@ class ClinicInsuranceProvider(models.Model):
         for vals in vals_list:
             if not vals.get('code') or vals.get('code') == '/':
                 vals['code'] = self.env['ir.sequence'].next_by_code('clinic.insurance.provider.seq') or '/'
+            
+            # Create partner if not present
+            if not vals.get('partner_id'):
+                partner_vals = {
+                    'name': vals.get('name') or 'Insurance Provider',
+                    'is_company': True,
+                    'phone': vals.get('phone'),
+                    'email': vals.get('email'),
+                    'website': vals.get('website'),
+                    'street': vals.get('building') or vals.get('street'),
+                    'city': vals.get('city'),
+                    'zip': vals.get('postal_code'),
+                    'country_id': vals.get('country_id'),
+                }
+                partner = self.env['res.partner'].create(partner_vals)
+                vals['partner_id'] = partner.id
+                
         return super(ClinicInsuranceProvider, self).create(vals_list)
+
+    def write(self, vals):
+        res = super(ClinicInsuranceProvider, self).write(vals)
+        for rec in self:
+            if rec.partner_id:
+                partner_vals = {}
+                if 'name' in vals:
+                    partner_vals['name'] = vals['name']
+                if 'phone' in vals:
+                    partner_vals['phone'] = vals['phone']
+                if 'email' in vals:
+                    partner_vals['email'] = vals['email']
+                if 'website' in vals:
+                    partner_vals['website'] = vals['website']
+                if 'street' in vals or 'building' in vals:
+                    partner_vals['street'] = rec.building or rec.street
+                if 'city' in vals:
+                    partner_vals['city'] = vals['city']
+                if 'postal_code' in vals:
+                    partner_vals['zip'] = vals['postal_code']
+                if 'country_id' in vals:
+                    partner_vals['country_id'] = vals['country_id']
+                
+                if partner_vals:
+                    rec.partner_id.write(partner_vals)
+        return res
+
+    def _init_insurance_provider_partners(self):
+        providers = self.search([('partner_id', '=', False)])
+        for provider in providers:
+            partner = self.env['res.partner'].create({
+                'name': provider.name or 'Insurance Provider',
+                'is_company': True,
+                'phone': provider.phone,
+                'email': provider.email,
+                'website': provider.website,
+                'street': provider.building or provider.street,
+                'city': provider.city,
+                'zip': provider.postal_code,
+                'country_id': provider.country_id.id if provider.country_id else False,
+            })
+            provider.write({'partner_id': partner.id})
+
+    def _register_hook(self):
+        super(ClinicInsuranceProvider, self)._register_hook()
+        self.sudo()._init_insurance_provider_partners()

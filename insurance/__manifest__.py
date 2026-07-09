@@ -22,6 +22,7 @@
         'views/insurance_case_views.xml',
         'views/clinic_patient_views.xml',
         'views/insurance_menu.xml',
+        'views/fetchmail_server_views.xml',
     ],
 
     'installable': True,
