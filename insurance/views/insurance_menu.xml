@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
 
+    <!-- Root Menu -->
     <menuitem
         id="insurance_root_menu"
-        name="Insurance"
+        name="Insurance Management"
         sequence="20"/>
 
+    <!-- Insurance Providers -->
     <menuitem
         id="insurance_providers_menu"
         name="Insurance Providers"
@@ -13,11 +15,41 @@
         action="action_insurance_provider"
         sequence="10"/>
 
+    <!-- Insurance Cases -->
+    <menuitem
+        id="insurance_cases_menu"
+        name="Insurance Cases"
+        parent="insurance_root_menu"
+        action="action_insurance_case"
+        sequence="20"/>
+
+    <!-- Coverage Rules (mapping to Policy model) -->
     <menuitem
         id="insurance_policy_menu"
-        name="Insurance Policies"
+        name="Coverage Rules"
         parent="insurance_root_menu"
         action="action_insurance_policy"
+        sequence="30"/>
+
+    <!-- Reports Parent Menu -->
+    <menuitem
+        id="insurance_reports_parent_menu"
+        name="Reports"
+        parent="insurance_root_menu"
+        sequence="40"/>
+
+    <menuitem
+        id="insurance_report_policies_menu"
+        name="Active/Expired Policies"
+        parent="insurance_reports_parent_menu"
+        action="action_insurance_policy"
+        sequence="10"/>
+
+    <menuitem
+        id="insurance_report_cases_menu"
+        name="Cases by Status"
+        parent="insurance_reports_parent_menu"
+        action="action_insurance_case"
         sequence="20"/>
 
 </odoo>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_hospital_bill" model="ir.actions.report">
+        <field name="name">Hospital Bill / Invoice</field>
+        <field name="model">hospital.billing</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">billing_management.report_hospital_bill_template</field>
+        <field name="report_file">billing_management.report_hospital_bill_template</field>
+        <field name="print_report_name">'Invoice_%s' % (object.name or '').replace('/', '_')</field>
+        <field name="binding_model_id" ref="model_hospital_billing"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

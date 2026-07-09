@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Patient Insurance Document List View -->
+    <record id="view_patient_insurance_document_tree" model="ir.ui.view">
+        <field name="name">patient.insurance.document.list</field>
+        <field name="model">patient.insurance.document</field>
+        <field name="arch" type="xml">
+            <list string="Insurance Documents">
+                <field name="document_type"/>
+                <field name="name"/>
+                <field name="issue_date"/>
+                <field name="expiry_date"/>
+                <field name="uploaded_by_id"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Patient Insurance Document Form View -->
+    <record id="view_patient_insurance_document_form" model="ir.ui.view">
+        <field name="name">patient.insurance.document.form</field>
+        <field name="model">patient.insurance.document</field>
+        <field name="arch" type="xml">
+            <form string="Insurance Document">
+                <sheet>
+                    <group>
+                        <group string="Document Information">
+                            <field name="document_type"/>
+                            <field name="name"/>
+                            <field name="attachment" filename="attachment_filename" widget="binary"/>
+                            <field name="attachment_filename" invisible="1"/>
+                        </group>
+                        <group string="Validity &amp; Metadata">
+                            <field name="issue_date"/>
+                            <field name="expiry_date"/>
+                            <field name="uploaded_by_id" readonly="1"/>
+                            <field name="upload_date" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Remarks">
+                        <field name="remarks" placeholder="Add any relevant remarks..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Inherited Patient Form View -->
+    <record id="view_clinic_patient_form_inherit_insurance" model="ir.ui.view">
+        <field name="name">clinic.patient.form.inherit.insurance</field>
+        <field name="model">clinic.patient</field>
+        <field name="inherit_id" ref="Clinic_master.view_clinic_patient_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='insurance_info']" position="after">
+                <page string="Insurance Documents" name="insurance_documents" invisible="not has_insurance">
+                    <field name="insurance_document_ids">
+                        <list string="Insurance Documents">
+                            <field name="document_type"/>
+                            <field name="name"/>
+                            <field name="issue_date"/>
+                            <field name="expiry_date"/>
+                            <field name="uploaded_by_id"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

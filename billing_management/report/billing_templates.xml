@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_hospital_bill_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333333; padding: 20px;">
+                        <!-- Invoice Title -->
+                        <div style="border-bottom: 2px solid #2C3E50; padding-bottom: 10px; margin-bottom: 20px;">
+                            <h2 style="color: #2C3E50; margin: 0;">INVOICE</h2>
+                            <span style="font-size: 14px; color: #7F8C8D;">Bill Number: <strong><t t-out="o.name"/></strong></span>
+                        </div>
+
+                        <!-- Date and Patient Details -->
+                        <div style="display: table; width: 100%; margin-bottom: 30px;">
+                            <div style="display: table-row;">
+                                <div style="display: table-cell; width: 50%;">
+                                    <h4 style="color: #34495E; margin: 0 0 5px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Billed To:</h4>
+                                    <p style="margin: 0; font-size: 15px; font-weight: bold; color: #2C3E50;"><t t-out="o.patient_id.name"/></p>
+                                    <p style="margin: 3px 0 0 0; color: #555;" t-if="o.patient_id.mobile">Mobile: <t t-out="o.patient_id.mobile"/></p>
+                                    <p style="margin: 3px 0 0 0; color: #555;" t-if="o.patient_id.email">Email: <t t-out="o.patient_id.email"/></p>
+                                </div>
+                                <div style="display: table-cell; width: 50%; text-align: right; vertical-align: top;">
+                                    <p style="margin: 0; color: #555;"><strong>Invoice Date:</strong> <t t-out="o.bill_date"/></p>
+                                    <p style="margin: 5px 0 0 0; color: #555;"><strong>Appointment:</strong> <t t-out="o.appointment_id.name"/></p>
+                                    <p style="margin: 5px 0 0 0; color: #555;"><strong>Doctor:</strong> <t t-out="o.appointment_id.doctor_id.name"/></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Billing Table -->
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14px;">
+                            <thead>
+                                <tr style="background-color: #2C3E50; color: #FFFFFF; text-align: left;">
+                                    <th style="padding: 10px; border: 1px solid #BDC3C7;">Description</th>
+                                    <th style="padding: 10px; border: 1px solid #BDC3C7; text-align: center; width: 100px;">Quantity</th>
+                                    <th style="padding: 10px; border: 1px solid #BDC3C7; text-align: right; width: 120px;">Unit Price</th>
+                                    <th style="padding: 10px; border: 1px solid #BDC3C7; text-align: right; width: 120px;">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="o.billing_line_ids" t-as="line">
+                                    <tr>
+                                        <td style="padding: 10px; border: 1px solid #ECF0F1;">
+                                            <t t-out="line.name"/>
+                                        </td>
+                                        <td style="padding: 10px; border: 1px solid #ECF0F1; text-align: center;">
+                                            <t t-out="line.quantity"/>
+                                        </td>
+                                        <td style="padding: 10px; border: 1px solid #ECF0F1; text-align: right;">
+                                            <t t-out="line.price_unit" t-options="{'widget': 'float', 'precision': 2}"/>
+                                        </td>
+                                        <td style="padding: 10px; border: 1px solid #ECF0F1; text-align: right; font-weight: bold; color: #2C3E50;">
+                                            <t t-out="line.price_subtotal" t-options="{'widget': 'float', 'precision': 2}"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <!-- Total Section -->
+                        <div style="float: right; width: 300px; margin-bottom: 50px;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                                <tr style="border-bottom: 2px solid #2C3E50;">
+                                    <td style="padding: 10px 0; font-weight: bold; color: #2C3E50; font-size: 16px;">Total Amount Due:</td>
+                                    <td style="padding: 10px 0; text-align: right; font-weight: bold; color: #2C3E50; font-size: 18px;">
+                                        <t t-out="o.amount" t-options="{'widget': 'float', 'precision': 2}"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <div style="clear: both;"></div>
+
+                        <!-- Payment Status Badge -->
+                        <div style="margin-top: 20px; padding: 15px; border-radius: 6px; text-align: center; font-size: 16px; font-weight: bold;"
+                             t-attf-style="background-color: #{'#E8F8F5' if o.state == 'paid' else '#FEF9E7' if o.state == 'draft' else '#FDEDEC'};
+                                           color: #{'#117A65' if o.state == 'paid' else '#B7950B' if o.state == 'draft' else '#922B21'};
+                                           border: 1px solid #{'#A3E4D7' if o.state == 'paid' else '#F9E79F' if o.state == 'draft' else '#FADBD8'};">
+                            <span t-if="o.state == 'paid'">PAYMENT STATUS: PAID - THANK YOU</span>
+                            <span t-elif="o.state == 'draft'">PAYMENT STATUS: UNPAID (DRAFT)</span>
+                            <span t-else="">PAYMENT STATUS: CANCELLED</span>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

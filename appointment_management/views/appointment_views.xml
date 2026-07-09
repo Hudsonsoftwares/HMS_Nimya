@@ -16,6 +16,7 @@
                 <field name="visit_type" widget="badge"/>
                 <field name="priority" widget="badge" decoration-danger="priority == 'emergency'" decoration-warning="priority == 'urgent'"/>
                 <field name="payment_type"/>
+                <field name="consultation_fees"/>
                 <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state in ('confirmed','done')" decoration-warning="state == 'waiting'" decoration-danger="state == 'cancel'"/>
             </list>
         </field>
@@ -80,6 +81,7 @@
                     <group>
                         <group string="Billing &amp; Insurance">
                             <field name="payment_type"/>
+                            <field name="consultation_fees"/>
                             <field name="previous_visit_date"/>
                         </group>
                         <group string="Insurance Specifications" invisible="not has_insurance">
@@ -88,6 +90,7 @@
                             <field name="policy_number"/>
                             <field name="insurance_expiry_date"/>
                             <field name="insurance_case_id"/>
+                            <field name="insurance_summary" readonly="1" string="Insurance Summary"/>
                         </group>
                     </group>
                     

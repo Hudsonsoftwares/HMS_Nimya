@@ -1,10 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="1">
+        <!-- Insurance Provider Sequence -->
         <record id="seq_insurance_provider" model="ir.sequence">
             <field name="name">Insurance Provider Code</field>
             <field name="code">clinic.insurance.provider.seq</field>
             <field name="prefix">INS</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- Insurance Case Sequence -->
+        <record id="seq_insurance_case" model="ir.sequence">
+            <field name="name">Insurance Case Number</field>
+            <field name="code">insurance.case.seq</field>
+            <field name="prefix">INS</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- Insurance Pre-Authorization Sequence -->
+        <record id="seq_insurance_preauth" model="ir.sequence">
+            <field name="name">Insurance Pre-Authorization Number</field>
+            <field name="code">insurance.preauthorization.seq</field>
+            <field name="prefix">PRE</field>
             <field name="padding">5</field>
             <field name="company_id" eval="False"/>
         </record>

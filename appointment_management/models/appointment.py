@@ -208,11 +208,32 @@ class HospitalAppointment(models.Model):
         string='Insurance Case',
         readonly=True,
     )
+    insurance_summary = fields.Text(
+        string='Insurance Summary',
+        related='insurance_case_id.verification_summary',
+        readonly=True,
+    )
     appointment_datetime = fields.Datetime(
         string='Appointment Date/Time',
         compute='_compute_appointment_datetime',
         store=True,
     )
+    consultation_fees = fields.Float(
+        string='Consultation Fees',
+        compute='_compute_consultation_fees',
+        store=True,
+        readonly=False,
+        tracking=True,
+    )
+
+    @api.depends('doctor_id')
+    def _compute_consultation_fees(self):
+        for rec in self:
+            if rec.doctor_id:
+                schedule = self.env['doctor.schedule'].search([('doctor_id', '=', rec.doctor_id.id)], limit=1)
+                rec.consultation_fees = schedule.consultation_fees if schedule else 0.0
+            else:
+                rec.consultation_fees = 0.0
     
     # Notes/Clinical Info
     chief_complaint = fields.Char(string='Chief Complaint')

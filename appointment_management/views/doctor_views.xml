@@ -17,6 +17,7 @@
                 <field name="work_start_time" widget="float_time"/>
                 <field name="work_end_time" widget="float_time"/>
                 <field name="max_patients"/>
+                <field name="consultation_fees"/>
             </list>
         </field>
     </record>
@@ -33,6 +34,7 @@
                             <field name="doctor_id"/>
                             <field name="max_patients"/>
                             <field name="consultation_duration"/>
+                            <field name="consultation_fees"/>
                         </group>
                         <group string="Working Days">
                             <label for="mon" string="Working Weekdays"/>

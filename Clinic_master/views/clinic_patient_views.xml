@@ -108,6 +108,8 @@
                                 <group string="Policy Specifications" invisible="not has_insurance">
                                     <field name="policy_number"/>
                                     <field name="membership_number"/>
+                                    <field name="health_card_number"/>
+                                    <field name="insurance_issue_date"/>
                                     <field name="insurance_expiry_date"/>
                                 </group>
                             </group>

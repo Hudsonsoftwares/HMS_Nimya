@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Pre-Authorization Form View (Popup Form) -->
+    <record id="view_insurance_preauthorization_form" model="ir.ui.view">
+        <field name="name">insurance.preauthorization.form</field>
+        <field name="model">insurance.preauthorization</field>
+        <field name="arch" type="xml">
+            <form string="Pre-Authorization Request">
+                <header>
+                    <button name="action_submit" string="Mark Submitted" type="object" class="oe_highlight" invisible="approval_status != 'draft'"/>
+                    <button name="action_approve" string="Approve" type="object" class="oe_highlight" invisible="approval_status != 'pending'"/>
+                    <button name="action_reject" string="Reject" type="object" invisible="approval_status != 'pending'"/>
+                    <field name="approval_status" widget="statusbar" statusbar_visible="draft,pending,approved,rejected"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Request Details">
+                            <field name="case_id" readonly="1" options="{'no_open': True}"/>
+                            <field name="patient_id"/>
+                            <field name="provider_id"/>
+                            <field name="requested_service"/>
+                            <field name="department"/>
+                            <field name="request_type"/>
+                            <field name="requested_by"/>
+                            <field name="request_date"/>
+                            <field name="priority"/>
+                        </group>
+                        <group string="Approval &amp; Submission">
+                            <group string="Submission" colspan="2">
+                                <field name="submission_method"/>
+                                <field name="submission_date"/>
+                                <field name="reference_number"/>
+                            </group>
+                            <group string="Approval Info" colspan="2" invisible="approval_status == 'draft'">
+                                <field name="approval_number" required="approval_status == 'approved'"/>
+                                <field name="approval_date"/>
+                                <field name="approval_expiry_date"/>
+                                <field name="approved_by"/>
+                            </group>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Documents" name="documents">
+                            <group>
+                                <group string="Letters &amp; Replies">
+                                    <field name="attachment_approval_filename" invisible="1"/>
+                                    <field name="attachment_approval" filename="attachment_approval_filename" widget="binary"/>
+                                    
+                                    <field name="attachment_email_filename" invisible="1"/>
+                                    <field name="attachment_email" filename="attachment_email_filename" widget="binary"/>
+                                </group>
+                                <group string="Reports &amp; Supporting">
+                                    <field name="attachment_report_filename" invisible="1"/>
+                                    <field name="attachment_report" filename="attachment_report_filename" widget="binary"/>
+                                    
+                                    <field name="attachment_support_filename" invisible="1"/>
+                                    <field name="attachment_support" filename="attachment_support_filename" widget="binary"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="notes" placeholder="Internal notes regarding this request..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Pre-Authorization Tree View -->
+    <record id="view_insurance_preauthorization_tree" model="ir.ui.view">
+        <field name="name">insurance.preauthorization.list</field>
+        <field name="model">insurance.preauthorization</field>
+        <field name="arch" type="xml">
+            <list string="Pre-Authorization Requests">
+                <field name="name"/>
+                <field name="requested_service"/>
+                <field name="department"/>
+                <field name="priority" widget="badge" decoration-warning="priority == 'high'" decoration-danger="priority == 'emergency'" decoration-success="priority == 'normal'" decoration-info="priority == 'low'"/>
+                <field name="request_date"/>
+                <field name="approval_status" widget="badge" decoration-muted="approval_status == 'draft'" decoration-info="approval_status == 'pending'" decoration-success="approval_status == 'approved'" decoration-danger="approval_status == 'rejected'"/>
+                <field name="approval_number"/>
+            </list>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form View -->
+    <record id="view_insurance_case_form" model="ir.ui.view">
+        <field name="name">insurance.case.form</field>
+        <field name="model">insurance.case</field>
+        <field name="arch" type="xml">
+            <form string="Insurance Case">
+                <header>
+                    <button name="action_verify_insurance" string="Verify Insurance" type="object" class="oe_highlight" invisible="verification_status not in ['draft']"/>
+                    <button name="action_send_email" string="Send Email" type="object" invisible="verification_status != 'pending'"/>
+                    <button name="action_open_portal" string="Open Portal" type="object" invisible="verification_status not in ['draft', 'pending']"/>
+                    <button name="action_mark_verified" string="Mark Verified" type="object" class="oe_highlight" invisible="verification_status in ['verified', 'rejected', 'expired']"/>
+                    <button name="action_reject" string="Reject" type="object" invisible="verification_status in ['verified', 'rejected', 'expired']"/>
+                    
+                    <field name="verification_status" widget="statusbar" statusbar_visible="draft,pending,verified,rejected,expired"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_patient" type="object" class="oe_stat_button" icon="fa-user">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Patient</span>
+                            </div>
+                        </button>
+                        <button name="action_view_dummy" type="object" class="oe_stat_button" icon="fa-stethoscope">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Consultations</span>
+                            </div>
+                        </button>
+                        <button name="action_view_dummy" type="object" class="oe_stat_button" icon="fa-flask">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Lab Orders</span>
+                            </div>
+                        </button>
+                        <button name="action_view_dummy" type="object" class="oe_stat_button" icon="fa-file-text-o">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Prescriptions</span>
+                            </div>
+                        </button>
+                        <button name="action_view_dummy" type="object" class="oe_stat_button" icon="fa-money">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Bills</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Patient Information">
+                            <field name="patient_id" options="{'no_create': True}"/>
+                            <field name="patient_id_ref"/>
+                            <field name="visit_date"/>
+                            <field name="created_by_id"/>
+                        </group>
+                        <group string="Insurance Information">
+                            <field name="provider_id"/>
+                            <field name="policy_number"/>
+                            <field name="membership_number"/>
+                            <field name="health_card_number"/>
+                            <field name="issue_date"/>
+                            <field name="expiry_date"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Verification Settings" name="verification_settings">
+                            <group>
+                                <group string="Methods">
+                                    <field name="verification_method"/>
+                                </group>
+                                <group string="Log Details">
+                                    <field name="verification_date"/>
+                                    <field name="verified_by_id"/>
+                                </group>
+                            </group>
+                            <group string="Summary">
+                                <field name="verification_summary" readonly="1" nolabel="1" placeholder="Summary will appear here once communication is received..."/>
+                            </group>
+                        </page>
+                        <page string="Pre-Authorization" name="pre_auth">
+                            <group>
+                                <field name="requires_pre_auth"/>
+                            </group>
+                            <group string="Pre-Authorization Requests" invisible="not requires_pre_auth">
+                                <field name="preauth_ids" nolabel="1" context="{'default_case_id': id}">
+                                    <list>
+                                        <field name="name"/>
+                                        <field name="requested_service"/>
+                                        <field name="department"/>
+                                        <field name="priority" widget="badge" decoration-warning="priority == 'high'" decoration-danger="priority == 'emergency'" decoration-success="priority == 'normal'" decoration-info="priority == 'low'"/>
+                                        <field name="request_date"/>
+                                        <field name="approval_status" widget="badge" decoration-muted="approval_status == 'draft'" decoration-info="approval_status == 'pending'" decoration-success="approval_status == 'approved'" decoration-danger="approval_status == 'rejected'"/>
+                                        <field name="approval_number"/>
+                                    </list>
+                                </field>
+                            </group>
+                        </page>
+                        <page string="Coverage" name="coverage">
+                            <group>
+                                <group string="Status">
+                                    <field name="coverage_status"/>
+                                    <field name="copay_percentage"/>
+                                </group>
+                                <group string="Notes">
+                                    <field name="coverage_notes" placeholder="Enter specific coverage remarks, exclusions, or exceptions..."/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Documents" name="documents">
+                            <group>
+                                <group string="Identification &amp; Approval">
+                                    <field name="attachment_card_filename" invisible="1"/>
+                                    <field name="attachment_card" filename="attachment_card_filename" widget="binary"/>
+                                    
+                                    <field name="attachment_approval_filename" invisible="1"/>
+                                    <field name="attachment_approval" filename="attachment_approval_filename" widget="binary"/>
+                                </group>
+                                <group string="Supporting Correspondence">
+                                    <field name="attachment_email_filename" invisible="1"/>
+                                    <field name="attachment_email" filename="attachment_email_filename" widget="binary"/>
+                                    
+                                    <field name="attachment_support_filename" invisible="1"/>
+                                    <field name="attachment_support" filename="attachment_support_filename" widget="binary"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Patient Insurance Documents" name="patient_insurance_documents" invisible="not patient_id">
+                            <field name="insurance_document_ids" readonly="1">
+                                <list string="Patient Insurance Documents" create="false" edit="false" delete="false">
+                                    <field name="document_type"/>
+                                    <field name="name"/>
+                                    <field name="issue_date"/>
+                                    <field name="expiry_date"/>
+                                    <field name="uploaded_by_id"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree/List View -->
+    <record id="view_insurance_case_tree" model="ir.ui.view">
+        <field name="name">insurance.case.tree</field>
+        <field name="model">insurance.case</field>
+        <field name="arch" type="xml">
+            <list string="Insurance Cases">
+                <field name="name"/>
+                <field name="patient_id"/>
+                <field name="patient_id_ref" string="Patient ID"/>
+                <field name="visit_date"/>
+                <field name="provider_id"/>
+                <field name="verification_method"/>
+                <field name="verification_status" widget="badge" decoration-muted="verification_status == 'draft'" decoration-info="verification_status == 'pending'" decoration-success="verification_status == 'verified'" decoration-danger="verification_status == 'rejected'" decoration-warning="verification_status == 'expired'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_insurance_case_search" model="ir.ui.view">
+        <field name="name">insurance.case.search</field>
+        <field name="model">insurance.case</field>
+        <field name="arch" type="xml">
+            <search string="Search Insurance Cases">
+                <field name="name" string="Case Number" filter_domain="['|', ('name', 'ilike', self), ('patient_id.name', 'ilike', self)]"/>
+                <field name="patient_id"/>
+                <field name="provider_id"/>
+                <separator/>
+                <filter string="Draft" name="draft" domain="[('verification_status', '=', 'draft')]"/>
+                <filter string="Pending" name="pending" domain="[('verification_status', '=', 'pending')]"/>
+                <filter string="Verified" name="verified" domain="[('verification_status', '=', 'verified')]"/>
+                <filter string="Rejected" name="rejected" domain="[('verification_status', '=', 'rejected')]"/>
+                <filter string="Expired" name="expired" domain="[('verification_status', '=', 'expired')]"/>
+                <separator/>
+                <filter string="Requires Pre-Auth" name="req_pre_auth" domain="[('requires_pre_auth', '=', True)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Patient" name="group_by_patient" context="{'group_by': 'patient_id'}"/>
+                    <filter string="Insurance Provider" name="group_by_provider" context="{'group_by': 'provider_id'}"/>
+                    <filter string="Verification Method" name="group_by_method" context="{'group_by': 'verification_method'}"/>
+                    <filter string="Status" name="group_by_status" context="{'group_by': 'verification_status'}"/>
+                    <filter string="Visit Date" name="group_by_date" context="{'group_by': 'visit_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_insurance_case" model="ir.actions.act_window">
+        <field name="name">Insurance Cases</field>
+        <field name="res_model">insurance.case</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_insurance_case_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Manage Patient Insurance Cases
+            </p>
+            <p>
+                Verify patient coverages, track pre-authorizations, and upload claims correspondence.
+            </p>
+        </field>
+    </record>
+</odoo>

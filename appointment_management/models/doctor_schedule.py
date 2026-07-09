@@ -33,6 +33,7 @@ class DoctorSchedule(models.Model):
     # Patient Limits
     max_patients = fields.Integer(string='Maximum Patients Per Day', default=25)
     consultation_duration = fields.Integer(string='Consultation Duration (mins)', default=15)
+    consultation_fees = fields.Float(string='Consultation Fees', default=0.0)
 
     _sql_constraints = [
         ('doctor_uniq', 'unique(doctor_id)', 'A working schedule already exists for this doctor!')
