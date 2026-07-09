@@ -1,7 +1,7 @@
 {
-    'name': 'Billing & Payment',
+    'name': 'Consultation Management',
     'version': '1.0',
-    'summary': 'Hospital Billing and Payment',
+    'summary': 'Hospital Consultation Module',
     'author': 'Hudson Software Solutions',
     'category': 'Healthcare',
     'license': 'LGPL-3',
@@ -13,15 +13,13 @@
         'Clinic_master',
         'appointment_management',
         'nurse_triage',
+        'product',
     ],
 
     'data': [
         'security/ir.model.access.csv',
-        'data/billing_sequence.xml',
-        'report/billing_templates.xml',
-        'report/billing_report.xml',
-        'data/billing_email_template.xml',
-        'views/billing_views.xml',
+        'data/consultation_sequence.xml',
+        'views/consultation_views.xml',
     ],
 
     'installable': True,

@@ -1,0 +1,536 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Search View -->
+    <record id="view_hospital_consultation_search" model="ir.ui.view">
+        <field name="name">hospital.consultation.search</field>
+        <field name="model">hospital.consultation</field>
+        <field name="arch" type="xml">
+            <search string="Search Consultations">
+                <field name="name"/>
+                <field name="patient_id"/>
+                <field name="doctor_id"/>
+                <field name="diagnosis"/>
+                <group expand="0" string="Group By">
+                    <filter string="Date" name="group_by_date" context="{'group_by': 'visit_date:day'}"/>
+                    <filter string="Diagnosis" name="group_by_diagnosis" context="{'group_by': 'diagnosis'}"/>
+                    <filter string="Doctor" name="group_by_doctor" context="{'group_by': 'doctor_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Graph View -->
+    <record id="view_hospital_consultation_graph" model="ir.ui.view">
+        <field name="name">hospital.consultation.graph</field>
+        <field name="model">hospital.consultation</field>
+        <field name="arch" type="xml">
+            <graph string="Consultations Graph" type="bar">
+                <field name="doctor_id" type="row"/>
+                <field name="id" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Pivot View -->
+    <record id="view_hospital_consultation_pivot" model="ir.ui.view">
+        <field name="name">hospital.consultation.pivot</field>
+        <field name="model">hospital.consultation</field>
+        <field name="arch" type="xml">
+            <pivot string="Consultations Analysis">
+                <field name="doctor_id" type="row"/>
+                <field name="visit_date" type="col"/>
+                <field name="id" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Tree View -->
+    <record id="view_hospital_consultation_tree" model="ir.ui.view">
+        <field name="name">hospital.consultation.tree</field>
+        <field name="model">hospital.consultation</field>
+        <field name="arch" type="xml">
+            <list string="Consultations">
+                <field name="name" decoration-bf="1"/>
+                <field name="token_number" string="Token"/>
+                <field name="patient_id"/>
+                <field name="patient_age" string="Age"/>
+                <field name="doctor_id" widget="many2one_avatar"/>
+                <field name="visit_date"/>
+                <field name="priority" widget="badge" decoration-danger="priority == 'high'" decoration-info="priority == 'normal'"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-warning="state == 'consultation'" decoration-success="state == 'completed'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_hospital_consultation_form" model="ir.ui.view">
+        <field name="name">hospital.consultation.form</field>
+        <field name="model">hospital.consultation</field>
+        <field name="arch" type="xml">
+            <form string="Consultation">
+                <header>
+                    <button name="action_start" string="Start Consultation" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_complete" string="Complete Consultation" type="object" class="oe_highlight" invisible="state != 'consultation'"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state == 'completed'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,consultation,completed,cancel"/>
+                </header>
+                <sheet>
+                    <!-- Smart Buttons Section -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_generate_prescription" type="object" class="oe_stat_button" icon="fa-pencil-square-o" invisible="state == 'draft'">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text" invisible="prescription_generated">Draft</span>
+                                <span class="o_stat_text" invisible="not prescription_generated">Generated ✅</span>
+                                <span class="o_stat_value">Prescription</span>
+                            </div>
+                        </button>
+                        <button name="action_generate_lab" type="object" class="oe_stat_button" icon="fa-flask" invisible="state == 'draft'">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text" invisible="lab_request_generated">Draft</span>
+                                <span class="o_stat_text" invisible="not lab_request_generated">Generated ✅</span>
+                                <span class="o_stat_value">Lab Request</span>
+                            </div>
+                        </button>
+                        <button name="action_generate_radiology" type="object" class="oe_stat_button" icon="fa-film" invisible="state == 'draft'">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text" invisible="radiology_generated">Draft</span>
+                                <span class="o_stat_text" invisible="not radiology_generated">Generated ✅</span>
+                                <span class="o_stat_value">Radiology</span>
+                            </div>
+                        </button>
+                        <button name="action_view_dummy" type="object" class="oe_stat_button" icon="fa-money">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">View Patient</span>
+                                <span class="o_stat_value">Bills</span>
+                            </div>
+                        </button>
+                        <button name="action_view_dummy" type="object" class="oe_stat_button" icon="fa-shield">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Check</span>
+                                <span class="o_stat_value">Insurance</span>
+                            </div>
+                        </button>
+                        <button name="action_view_dummy" type="object" class="oe_stat_button" icon="fa-history">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Medical</span>
+                                <span class="o_stat_value">History</span>
+                            </div>
+                        </button>
+                        <button name="action_view_dummy" type="object" class="oe_stat_button" icon="fa-calendar">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Previous</span>
+                                <span class="o_stat_value">Visits</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="oe_title" style="margin-bottom: 20px;">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+
+                    <!-- Row 1: Patient and Appointment Info -->
+                    <group>
+                        <group string="Patient Details">
+                            <field name="patient_id"/>
+                            <field name="patient_id_ref"/>
+                            <field name="patient_name"/>
+                            <field name="patient_age"/>
+                            <field name="patient_gender"/>
+                            <field name="patient_blood_group"/>
+                            <field name="patient_phone"/>
+                        </group>
+                        <group string="Appointment Details">
+                            <field name="appointment_id"/>
+                            <field name="appointment_name"/>
+                            <field name="token_number"/>
+                            <field name="department_id"/>
+                            <field name="doctor_id"/>
+                            <field name="visit_date"/>
+                            <field name="appointment_time" widget="float_time"/>
+                            <field name="priority" widget="badge"/>
+                        </group>
+                    </group>
+
+                    <!-- Row 2: Nurse Triage Vitals -->
+                    <group string="Nurse Triage Vitals" invisible="not triage_id">
+                        <group>
+                            <field name="triage_id"/>
+                            <field name="temperature"/>
+                            <label for="systolic_bp" string="Blood Pressure"/>
+                            <div class="o_row">
+                                <field name="systolic_bp" class="oe_inline"/> / 
+                                <field name="diastolic_bp" class="oe_inline"/> mmHg
+                            </div>
+                            <field name="pulse_rate"/>
+                            <field name="respiratory_rate"/>
+                        </group>
+                        <group>
+                            <field name="spo2"/>
+                            <field name="weight"/>
+                            <field name="height"/>
+                            <field name="bmi"/>
+                            <field name="blood_sugar"/>
+                            <field name="allergies"/>
+                        </group>
+                    </group>
+
+                    <!-- Row 3: Previous Medical History -->
+                    <group string="Previous Medical History (Last 5 Visits)">
+                        <field name="previous_consultation_ids" nolabel="1" colspan="2" readonly="1">
+                            <list create="false" edit="false" delete="false">
+                                <field name="name" string="Record Number" decoration-bf="1"/>
+                                <field name="visit_date"/>
+                                <field name="diagnosis"/>
+                                <field name="treatment_plan" string="Medicines &amp; Treatment"/>
+                                <field name="lab_request_generated" string="Lab Requested?" widget="boolean"/>
+                                <field name="radiology_generated" string="Radiology Requested?" widget="boolean"/>
+                            </list>
+                        </field>
+                    </group>
+
+                    <!-- Row 4: Main Consultation Work Area -->
+                    <notebook>
+                        <page string="Consultation Details" name="consultation_details">
+                            <group>
+                                <field name="chief_complaint" placeholder="Chief Complaint..." readonly="state == 'completed'"/>
+                                <field name="history_present_illness" placeholder="History of Present Illness..." readonly="state == 'completed'"/>
+                                <field name="examination" placeholder="Physical Examination details..." readonly="state == 'completed'"/>
+                                <field name="diagnosis" placeholder="Diagnosis..." readonly="state == 'completed'"/>
+                                <field name="icd_code" placeholder="ICD-10 Code..." readonly="state == 'completed'"/>
+                                <field name="treatment_plan" placeholder="Medicines, Dosage, Treatment Plan..." readonly="state == 'completed'"/>
+                            </group>
+                        </page>
+                        <page string="Prescription / Medicines" name="prescription_medicines">
+                            <field name="medicine_line_ids" readonly="state == 'completed'">
+                                <list editable="bottom">
+                                    <field name="product_id" options="{'no_create': True, 'no_open': True}"/>
+                                    <field name="dosage" placeholder="e.g. 1-0-1"/>
+                                    <field name="duration" placeholder="e.g. 5 Days"/>
+                                    <field name="notes" placeholder="e.g. Take after food"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Orders / Referrals" name="orders_requests">
+                            <group string="Referral to Another Doctor">
+                                <group>
+                                    <field name="referral_doctor_id" placeholder="Select Doctor..." readonly="state == 'completed'"/>
+                                </group>
+                                <group>
+                                    <field name="referral_reason" placeholder="Referral reason..." readonly="state == 'completed'"/>
+                                </group>
+                            </group>
+                            <group string="Admission Request">
+                                <group>
+                                    <field name="admission_required" readonly="state == 'completed'"/>
+                                </group>
+                                <group>
+                                    <field name="admission_notes" placeholder="Reasons/notes for hospital admission..." readonly="state == 'completed'" invisible="not admission_required"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="AI Documents" name="ai_documents" invisible="state == 'draft'">
+                            <header style="margin-bottom: 20px;">
+                                <button name="action_generate_ai_referral" string="Generate Referral Letter" type="object" class="oe_highlight"/>
+                                <button name="action_generate_ai_fitness" string="Generate Fitness Certificate" type="object" class="oe_highlight"/>
+                                <button name="action_generate_ai_medical" string="Generate Medical Certificate" type="object" class="oe_highlight"/>
+                            </header>
+                            <group>
+                                <notebook style="width: 100%;">
+                                    <page string="Referral Letter">
+                                        <field name="ai_referral_letter" widget="html" placeholder="AI generated referral letter will appear here..."/>
+                                    </page>
+                                    <page string="Fitness Certificate">
+                                        <field name="ai_fitness_certificate" widget="html" placeholder="AI generated fitness certificate will appear here..."/>
+                                    </page>
+                                    <page string="Medical Certificate">
+                                        <field name="ai_medical_certificate" widget="html" placeholder="AI generated medical certificate will appear here..."/>
+                                    </page>
+                                </notebook>
+                            </group>
+                        </page>
+                        <page string="Doctor Notes" name="doctor_notes">
+                            <group>
+                                <field name="doctor_notes" placeholder="Private notes..." nolabel="1" readonly="state == 'completed'"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Doctor Dashboard Form View -->
+    <record id="view_doctor_dashboard_form" model="ir.ui.view">
+        <field name="name">doctor.dashboard.form</field>
+        <field name="model">doctor.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="Doctor Dashboard" create="false" edit="false" delete="false">
+                <sheet>
+                    <!-- Doctor Header Section -->
+                    <div style="background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 25px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 26px; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                                <span>👨⚕️</span>
+                                <field name="doctor_id" readonly="1" options="{'no_open': True}"/>
+                            </div>
+                            <div style="font-size: 14px; opacity: 0.8; margin-top: 5px;">
+                                <field name="department_id" readonly="1"/>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 12px; text-transform: uppercase; opacity: 0.6; font-weight: bold;">Date</div>
+                            <div style="font-size: 18px; font-weight: bold; margin-top: 3px;">
+                                <field name="date" readonly="1"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 1: KPI Stats Grid -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 30px; justify-content: space-between;">
+                        <!-- Total Patients -->
+                        <div style="flex: 1; min-width: 180px; background: #f1f5f9; border-left: 5px solid #64748b; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 12px; font-weight: bold; color: #475569; text-transform: uppercase;">Today's Patients</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #64748b; margin-top: 5px;"><field name="today_patients"/></div>
+                        </div>
+                        <!-- Waiting -->
+                        <div style="flex: 1; min-width: 180px; background: #fef3c7; border-left: 5px solid #d97706; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 12px; font-weight: bold; color: #b45309; text-transform: uppercase;">Waiting</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #d97706; margin-top: 5px;"><field name="waiting_count"/></div>
+                        </div>
+                        <!-- In Consultation -->
+                        <div style="flex: 1; min-width: 180px; background: #e0f2fe; border-left: 5px solid #0284c7; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 12px; font-weight: bold; color: #0369a1; text-transform: uppercase;">In Consultation</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #0284c7; margin-top: 5px;"><field name="consultation_count"/></div>
+                        </div>
+                        <!-- Completed -->
+                        <div style="flex: 1; min-width: 180px; background: #dcfce7; border-left: 5px solid #16a34a; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 12px; font-weight: bold; color: #15803d; text-transform: uppercase;">Completed</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #16a34a; margin-top: 5px;"><field name="completed_count"/></div>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Today's Queue -->
+                    <div style="font-size: 18px; font-weight: bold; color: #1e293b; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                        <span>📋</span>
+                        <span>Today's Active Patient Queue</span>
+                    </div>
+
+                    <field name="queue_ids" readonly="1" colspan="2">
+                        <list create="false" edit="false" delete="false">
+                            <field name="token_number" string="Token" decoration-bf="1"/>
+                            <field name="patient_name" string="Patient Name"/>
+                            <field name="patient_age" string="Age"/>
+                            <field name="patient_gender" string="Gender"/>
+                            <field name="appointment_time" string="Appointment Time" widget="float_time"/>
+                            <field name="priority" string="Priority" widget="badge" decoration-danger="priority == 'high'" decoration-info="priority == 'normal'"/>
+                            <field name="state" string="Status" widget="badge" decoration-info="state == 'draft'" decoration-warning="state == 'consultation'"/>
+                            <button name="action_start" string="Start" type="object" class="btn-primary oe_highlight" invisible="state != 'draft'"/>
+                            <button name="action_start" string="Continue" type="object" class="btn-info" invisible="state != 'consultation'"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- General Window Action -->
+    <record id="action_hospital_consultation" model="ir.actions.act_window">
+        <field name="name">Consultation Queue</field>
+        <field name="res_model">hospital.consultation</field>
+        <field name="view_mode">list,form,graph,pivot</field>
+        <field name="search_view_id" ref="view_hospital_consultation_search"/>
+    </record>
+
+    <!-- Dashboard Window Action -->
+    <record id="action_doctor_dashboard_server" model="ir.actions.server">
+        <field name="name">Doctor Dashboard</field>
+        <field name="model_id" ref="model_doctor_dashboard"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.action_open_dashboard()
+        </field>
+    </record>
+
+    <!-- ==========================================
+         ORDERS ACTIONS
+         ========================================== -->
+    <record id="action_order_prescriptions" model="ir.actions.act_window">
+        <field name="name">Prescriptions</field>
+        <field name="res_model">hospital.consultation</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('prescription_generated', '=', True)]</field>
+    </record>
+
+    <record id="action_order_labs" model="ir.actions.act_window">
+        <field name="name">Laboratory Test Requests</field>
+        <field name="res_model">hospital.consultation</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('lab_request_generated', '=', True)]</field>
+    </record>
+
+    <record id="action_order_radiology" model="ir.actions.act_window">
+        <field name="name">Radiology Requests</field>
+        <field name="res_model">hospital.consultation</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('radiology_generated', '=', True)]</field>
+    </record>
+
+    <record id="action_order_referrals" model="ir.actions.act_window">
+        <field name="name">Referrals to Other Doctors</field>
+        <field name="res_model">hospital.consultation</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('referral_doctor_id', '!=', False)]</field>
+    </record>
+
+    <record id="action_order_admissions" model="ir.actions.act_window">
+        <field name="name">Admission Requests</field>
+        <field name="res_model">hospital.consultation</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('admission_required', '=', True)]</field>
+    </record>
+
+    <!-- ==========================================
+         REPORTS ACTIONS
+         ========================================== -->
+    <record id="action_report_daily_consultations" model="ir.actions.act_window">
+        <field name="name">Daily Consultations Analysis</field>
+        <field name="res_model">hospital.consultation</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="context">{'search_default_group_by_date': 1}</field>
+    </record>
+
+    <record id="action_report_diagnosis_stats" model="ir.actions.act_window">
+        <field name="name">Diagnosis Statistics</field>
+        <field name="res_model">hospital.consultation</field>
+        <field name="view_mode">graph,pivot</field>
+        <field name="context">{'search_default_group_by_diagnosis': 1}</field>
+    </record>
+
+    <record id="action_report_doctor_performance" model="ir.actions.act_window">
+        <field name="name">Doctor Performance Statistics</field>
+        <field name="res_model">hospital.consultation</field>
+        <field name="view_mode">graph,pivot</field>
+        <field name="context">{'search_default_group_by_doctor': 1}</field>
+    </record>
+
+    <record id="action_report_followups" model="ir.actions.act_window">
+        <field name="name">Follow-up Consultations</field>
+        <field name="res_model">hospital.consultation</field>
+        <field name="view_mode">list,graph,pivot</field>
+        <field name="domain">[('followup_created', '=', True)]</field>
+    </record>
+
+    <!-- ==========================================
+         MENUS STRUCTURE
+         ========================================== -->
+    <record id="action_hospital_consultation" model="ir.actions.act_window">
+        <field name="name">Consultation Queue</field>
+        <field name="res_model">hospital.consultation</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Root Menu -->
+    <menuitem
+        id="menu_consultation_root"
+        name="Doctor Consultation"
+        sequence="35"/>
+
+    <!-- Dashboard Child Menu -->
+    <menuitem
+        id="menu_doctor_dashboard"
+        name="Dashboard"
+        parent="menu_consultation_root"
+        action="action_doctor_dashboard_server"
+        sequence="5"/>
+
+    <!-- Patient List Child Menu -->
+    <menuitem
+        id="menu_consultation"
+        name="Consultation Queue"
+        parent="menu_consultation_root"
+        action="action_hospital_consultation"
+        sequence="10"/>
+
+    <!-- Orders Main Menu -->
+    <menuitem
+        id="menu_consultation_orders"
+        name="Orders"
+        parent="menu_consultation_root"
+        sequence="20"/>
+
+    <!-- Orders Submenus -->
+    <menuitem
+        id="menu_order_prescriptions"
+        name="Prescriptions"
+        parent="menu_consultation_orders"
+        action="action_order_prescriptions"
+        sequence="10"/>
+
+    <menuitem
+        id="menu_order_labs"
+        name="Laboratory Requests"
+        parent="menu_consultation_orders"
+        action="action_order_labs"
+        sequence="20"/>
+
+    <menuitem
+        id="menu_order_radiology"
+        name="Radiology Requests"
+        parent="menu_consultation_orders"
+        action="action_order_radiology"
+        sequence="30"/>
+
+    <menuitem
+        id="menu_order_referrals"
+        name="Referrals"
+        parent="menu_consultation_orders"
+        action="action_order_referrals"
+        sequence="40"/>
+
+    <menuitem
+        id="menu_order_admissions"
+        name="Admissions"
+        parent="menu_consultation_orders"
+        action="action_order_admissions"
+        sequence="50"/>
+
+    <!-- Reports Main Menu -->
+    <menuitem
+        id="menu_consultation_reports"
+        name="Reports"
+        parent="menu_consultation_root"
+        sequence="30"/>
+
+    <!-- Reports Submenus -->
+    <menuitem
+        id="menu_report_daily_consultations"
+        name="Daily Consultations"
+        parent="menu_consultation_reports"
+        action="action_report_daily_consultations"
+        sequence="10"/>
+
+    <menuitem
+        id="menu_report_diagnosis_stats"
+        name="Diagnosis Statistics"
+        parent="menu_consultation_reports"
+        action="action_report_diagnosis_stats"
+        sequence="20"/>
+
+    <menuitem
+        id="menu_report_doctor_performance"
+        name="Doctor Performance"
+        parent="menu_consultation_reports"
+        action="action_report_doctor_performance"
+        sequence="30"/>
+
+    <menuitem
+        id="menu_report_followups"
+        name="Follow-up Report"
+        parent="menu_consultation_reports"
+        action="action_report_followups"
+        sequence="40"/>
+
+</odoo>

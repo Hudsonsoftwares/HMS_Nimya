@@ -1,7 +1,7 @@
 {
-    'name': 'Billing & Payment',
+    'name': 'Nurse Triage',
     'version': '1.0',
-    'summary': 'Hospital Billing and Payment',
+    'summary': 'Hospital Nurse Triage',
     'author': 'Hudson Software Solutions',
     'category': 'Healthcare',
     'license': 'LGPL-3',
@@ -12,16 +12,12 @@
         'contacts',
         'Clinic_master',
         'appointment_management',
-        'nurse_triage',
     ],
 
     'data': [
         'security/ir.model.access.csv',
-        'data/billing_sequence.xml',
-        'report/billing_templates.xml',
-        'report/billing_report.xml',
-        'data/billing_email_template.xml',
-        'views/billing_views.xml',
+        'data/nurse_triage_sequence.xml',
+        'views/nurse_triage_views.xml',
     ],
 
     'installable': True,

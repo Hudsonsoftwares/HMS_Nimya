@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Tree/List View -->
+    <record id="view_hospital_nurse_triage_tree" model="ir.ui.view">
+        <field name="name">hospital.nurse.triage.tree</field>
+        <field name="model">hospital.nurse.triage</field>
+        <field name="arch" type="xml">
+            <list string="Nurse Triage">
+                <field name="name" decoration-bf="1"/>
+                <field name="patient_id"/>
+                <field name="appointment_id"/>
+                <field name="doctor_id" widget="many2one_avatar"/>
+                <field name="visit_date"/>
+                <field name="temperature" string="Temp (°C)"/>
+                <field name="pulse_rate" string="Pulse (bpm)"/>
+                <field name="spo2" string="SpO2 (%)"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'completed'" decoration-danger="state == 'cancel'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_hospital_nurse_triage_form" model="ir.ui.view">
+        <field name="name">hospital.nurse.triage.form</field>
+        <field name="model">hospital.nurse.triage</field>
+        <field name="arch" type="xml">
+            <form string="Nurse Triage">
+                <header>
+                    <button name="action_complete" string="Complete Triage" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_send_to_doctor" string="Send to Doctor" type="object" class="oe_highlight" invisible="state != 'completed' or sent_to_doctor == True"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state != 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,completed,cancel"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Patient &amp; Appointment">
+                            <field name="patient_id" readonly="state == 'completed'"/>
+                            <field name="appointment_id" readonly="state == 'completed'"/>
+                            <field name="doctor_id"/>
+                            <field name="visit_date" readonly="state == 'completed'"/>
+                            <field name="sent_to_doctor" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Vitals &amp; Measurements">
+                        <group string="Vitals">
+                            <field name="temperature" placeholder="e.g. 37.0" readonly="state == 'completed'"/>
+                            <label for="systolic_bp" string="Blood Pressure"/>
+                            <div class="o_row">
+                                <field name="systolic_bp" class="oe_inline" placeholder="Systolic" readonly="state == 'completed'"/> / 
+                                <field name="diastolic_bp" class="oe_inline" placeholder="Diastolic" readonly="state == 'completed'"/> mmHg
+                            </div>
+                            <field name="pulse_rate" placeholder="e.g. 72" readonly="state == 'completed'"/>
+                            <field name="respiratory_rate" placeholder="e.g. 16" readonly="state == 'completed'"/>
+                            <field name="spo2" placeholder="e.g. 98" readonly="state == 'completed'"/>
+                        </group>
+                        <group string="Measurements">
+                            <field name="weight" placeholder="e.g. 70.0" readonly="state == 'completed'"/>
+                            <field name="height" placeholder="e.g. 175.0" readonly="state == 'completed'"/>
+                            <field name="bmi" readonly="1" force_save="1"/>
+                        </group>
+                    </group>
+                    <group string="Nursing Notes">
+                        <field name="nursing_notes" placeholder="Enter general observation notes, allergies, or patient complaint..." nolabel="1" readonly="state == 'completed'"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Dashboard Form View -->
+    <record id="view_nurse_triage_dashboard_form" model="ir.ui.view">
+        <field name="name">nurse.triage.dashboard.form</field>
+        <field name="model">nurse.triage.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="Triage Dashboard" create="false" edit="false" delete="false">
+                <sheet>
+                    <div style="font-size: 26px; font-weight: bold; color: #1e293b; margin-bottom: 25px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                        <span>Nurse Triage Dashboard</span>
+                        <button name="action_open_triage" type="object" string="View Patient Queue" class="btn btn-primary btn-sm"/>
+                    </div>
+
+                    <!-- Row 1: KPI Cards -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 30px; justify-content: space-between;">
+                        <!-- Total -->
+                        <div style="flex: 1; min-width: 200px; background: #f1f5f9; border-left: 5px solid #64748b; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 13px; font-weight: bold; color: #475569; text-transform: uppercase;">Total Vitals Recorded Today</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #64748b; margin-top: 5px;"><field name="total_triage"/></div>
+                        </div>
+                        <!-- Pending -->
+                        <div style="flex: 1; min-width: 200px; background: #fef3c7; border-left: 5px solid #d97706; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 13px; font-weight: bold; color: #b45309; text-transform: uppercase;">Patients Pending Triage</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #d97706; margin-top: 5px;"><field name="pending_triage"/></div>
+                        </div>
+                        <!-- Completed -->
+                        <div style="flex: 1; min-width: 200px; background: #dcfce7; border-left: 5px solid #16a34a; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 13px; font-weight: bold; color: #15803d; text-transform: uppercase;">Triage Completed Today</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #16a34a; margin-top: 5px;"><field name="completed_triage"/></div>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Queue Details -->
+                    <notebook>
+                        <page string="Active Triage Queue" name="pending_queue_tab">
+                            <field name="pending_queue_ids" readonly="1">
+                                <list create="false" edit="false" delete="false">
+                                    <field name="name" string="Triage Number" decoration-bf="1"/>
+                                    <field name="patient_id"/>
+                                    <field name="appointment_id"/>
+                                    <field name="doctor_id" widget="many2one_avatar"/>
+                                    <field name="visit_date"/>
+                                    <field name="state" widget="badge" decoration-warning="state == 'draft'"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Completed Triage List" name="completed_queue_tab">
+                            <field name="completed_queue_ids" readonly="1">
+                                <list create="false" edit="false" delete="false">
+                                    <field name="name" string="Triage Number" decoration-bf="1"/>
+                                    <field name="patient_id"/>
+                                    <field name="appointment_id"/>
+                                    <field name="doctor_id" widget="many2one_avatar"/>
+                                    <field name="temperature" string="Temp (°C)"/>
+                                    <field name="systolic_bp" string="BP Systolic"/>
+                                    <field name="diastolic_bp" string="BP Diastolic"/>
+                                    <field name="pulse_rate" string="Pulse"/>
+                                    <field name="spo2" string="SpO2"/>
+                                    <field name="bmi" string="BMI"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Window Action -->
+    <record id="action_hospital_nurse_triage" model="ir.actions.act_window">
+        <field name="name">Nurse Triage</field>
+        <field name="res_model">hospital.nurse.triage</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Dashboard Action -->
+    <record id="action_nurse_triage_dashboard_server" model="ir.actions.server">
+        <field name="name">Triage Dashboard</field>
+        <field name="model_id" ref="model_nurse_triage_dashboard"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.action_open_dashboard()
+        </field>
+    </record>
+
+    <!-- Root Menu -->
+    <menuitem
+        id="menu_nurse_triage_root"
+        name="Nurse Triage"
+        sequence="25"/>
+
+    <!-- Dashboard Child Menu -->
+    <menuitem
+        id="menu_nurse_triage_dashboard"
+        name="Dashboard"
+        parent="menu_nurse_triage_root"
+        action="action_nurse_triage_dashboard_server"
+        sequence="5"/>
+
+    <!-- Patient Queue Child Menu -->
+    <menuitem
+        id="menu_nurse_triage_patient_queue"
+        name="Patient Queue"
+        parent="menu_nurse_triage_root"
+        action="action_hospital_nurse_triage"
+        sequence="10"/>
+
+</odoo>

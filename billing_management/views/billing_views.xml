@@ -11,7 +11,11 @@
                 <field name="appointment_id"/>
                 <field name="bill_date"/>
                 <field name="amount"/>
-                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'paid'" decoration-danger="state == 'cancel'"/>
+                <field name="state" widget="badge" 
+                       decoration-info="state == 'draft'" 
+                       decoration-warning="state in ('pending_patient', 'pending_insurance')" 
+                       decoration-success="state in ('patient_paid', 'insurance_paid', 'closed')" 
+                       decoration-danger="state == 'cancel'"/>
             </list>
         </field>
     </record>
@@ -23,21 +27,50 @@
         <field name="arch" type="xml">
             <form string="Bill">
                 <header>
-                    <button name="action_pay" string="Pay" type="object" class="oe_highlight" invisible="state != 'draft'"/>
-                    <button name="action_cancel" string="Cancel" type="object" invisible="state != 'draft'"/>
-                    <button name="action_send_email" string="Send by Email" type="object" class="oe_highlight"/>
-                    <button name="action_print_bill" string="Print Invoice" type="object"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,paid,cancel"/>
+                    <!-- Normal (Non-Insurance) Cash Buttons -->
+                    <button name="action_pay" string="Pay" type="object" class="oe_highlight" invisible="state in ('closed', 'cancel') or insurance_case_id != False"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('closed', 'cancel') or insurance_case_id != False"/>
+                    <button name="action_send_email" string="Send by Email" type="object" class="oe_highlight" invisible="insurance_case_id != False"/>
+                    <button name="action_print_bill" string="Print Invoice" type="object" invisible="insurance_case_id != False"/>
+
+                    <!-- Insurance Workflow Buttons -->
+                    <button name="action_generate_bill" string="Generate Bill" type="object" class="oe_highlight" invisible="insurance_case_id == False or state != 'draft'"/>
+                    <button name="action_collect_copayment" string="Collect Co-payment" type="object" class="oe_highlight" invisible="insurance_case_id == False or state not in ('draft', 'pending_patient')"/>
+                    <button name="action_submit_insurance_claim" string="Submit Insurance Claim" type="object" class="oe_highlight" invisible="insurance_case_id == False or state not in ('draft', 'pending_patient', 'patient_paid')"/>
+                    <button name="action_receive_insurance_payment" string="Receive Insurance Payment" type="object" class="oe_highlight" invisible="insurance_case_id == False or state not in ('pending_insurance', 'partially_paid')"/>
+                    <button name="action_close_bill" string="Close Bill" type="object" class="oe_highlight" invisible="insurance_case_id == False or state not in ('insurance_paid', 'patient_paid')"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="insurance_case_id == False or state == 'closed'"/>
+                    <button name="action_send_email" string="Send by Email" type="object" invisible="insurance_case_id == False"/>
+                    <button name="action_print_bill" string="Print Receipt" type="object" invisible="insurance_case_id == False"/>
+                    
+                    <field name="state" widget="statusbar" statusbar_visible="draft,pending_patient,patient_paid,pending_insurance,insurance_paid,closed"/>
                 </header>
                 <sheet>
                     <group>
-                        <group string="Basic Information">
-                            <field name="name"/>
+                        <group string="Patient Information">
+                            <field name="name" string="Bill Number"/>
                             <field name="patient_id"/>
-                            <field name="appointment_id"/>
+                            <field name="patient_id_ref" string="Patient ID"/>
+                            <field name="appointment_id" string="Appointment Number"/>
+                            <field name="doctor_id"/>
+                            <field name="department_id"/>
                         </group>
-                        <group string="Payment Specifications">
+                        <group string="Payment &amp; Date">
                             <field name="bill_date"/>
+                        </group>
+                    </group>
+                    <group string="Insurance Information" invisible="not insurance_case_id">
+                        <group>
+                            <field name="insurance_case_id"/>
+                            <field name="provider_id"/>
+                            <field name="policy_number"/>
+                            <field name="membership_number"/>
+                        </group>
+                        <group>
+                            <field name="verification_status" widget="badge" decoration-success="verification_status == 'verified'"/>
+                            <field name="coverage_status" widget="badge" decoration-success="coverage_status == 'covered'" decoration-warning="coverage_status == 'partially'" decoration-danger="coverage_status == 'not_covered'"/>
+                            <field name="copay_percentage" string="Coverage Percentage (%)"/>
+                            <field name="expiry_date"/>
                         </group>
                     </group>
                     <notebook>
@@ -50,8 +83,15 @@
                                     <field name="price_subtotal" readonly="1" force_save="1"/>
                                 </list>
                             </field>
-                            <group class="oe_subtotal_footer oe_right">
-                                <field name="amount" class="oe_subtotal_footer_separator"/>
+                            <group class="oe_subtotal_footer oe_right" style="width: 100%;">
+                                <group invisible="not insurance_case_id" style="float: left; width: 50%;">
+                                    <field name="amount" string="Total Consultation Fee" readonly="1"/>
+                                    <field name="insurance_amount" string="Insurance Share (Pays)" readonly="1"/>
+                                    <field name="patient_amount" string="Patient Share (Pays)" readonly="1"/>
+                                </group>
+                                <group style="float: right; width: 50%;">
+                                    <field name="amount" class="oe_subtotal_footer_separator"/>
+                                </group>
                             </group>
                         </page>
                     </notebook>
@@ -96,7 +136,11 @@
                             <field name="name"/>
                             <field name="bill_date"/>
                             <field name="amount"/>
-                            <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'paid'" decoration-danger="state == 'cancel'"/>
+                            <field name="state" widget="badge" 
+                                   decoration-info="state == 'draft'" 
+                                   decoration-warning="state in ('pending_patient', 'pending_insurance')" 
+                                   decoration-success="state in ('patient_paid', 'insurance_paid', 'closed')" 
+                                   decoration-danger="state == 'cancel'"/>
                             <button name="action_pay" string="Pay" type="object" class="oe_highlight" invisible="state != 'draft'"/>
                             <button name="action_cancel" string="Cancel" type="object" invisible="state != 'draft'"/>
                         </list>

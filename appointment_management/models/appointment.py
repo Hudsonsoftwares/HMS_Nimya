@@ -206,7 +206,8 @@ class HospitalAppointment(models.Model):
     insurance_case_id = fields.Many2one(
         comodel_name='insurance.case',
         string='Insurance Case',
-        readonly=True,
+        domain="[('patient_id', '=', patient_id), ('verification_status', '=', 'verified')]",
+        readonly=False,
     )
     insurance_summary = fields.Text(
         string='Insurance Summary',
@@ -542,3 +543,17 @@ class HospitalAppointment(models.Model):
             'view_mode': 'form',
             'target': 'current',
         }
+
+    @api.onchange('patient_id', 'payment_type')
+    def _onchange_patient_id_insurance(self):
+        if self.patient_id and self.payment_type == 'insurance':
+            verified_case = self.env['insurance.case'].search([
+                ('patient_id', '=', self.patient_id.id),
+                ('verification_status', '=', 'verified')
+            ], order='id desc', limit=1)
+            if verified_case:
+                self.insurance_case_id = verified_case.id
+            else:
+                self.insurance_case_id = False
+        else:
+            self.insurance_case_id = False

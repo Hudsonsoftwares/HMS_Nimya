@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hospital_nurse_triage_receptionist,hospital.nurse.triage.receptionist,model_hospital_nurse_triage,Clinic_master.group_hms_receptionist,1,1,1,1
+access_hospital_nurse_triage_admin,hospital.nurse.triage.admin,model_hospital_nurse_triage,Clinic_master.group_hms_admin,1,1,1,1
+access_nurse_triage_dashboard_receptionist,nurse.triage.dashboard.receptionist,model_nurse_triage_dashboard,Clinic_master.group_hms_receptionist,1,1,1,1
+access_nurse_triage_dashboard_admin,nurse.triage.dashboard.admin,model_nurse_triage_dashboard,Clinic_master.group_hms_admin,1,1,1,1

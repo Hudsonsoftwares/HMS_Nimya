@@ -36,12 +36,123 @@ class HospitalBilling(models.Model):
     state = fields.Selection(
         selection=[
             ('draft', 'Draft'),
-            ('paid', 'Paid'),
+            ('pending_patient', 'Pending Patient Payment'),
+            ('patient_paid', 'Patient Paid'),
+            ('pending_insurance', 'Pending Insurance Payment'),
+            ('insurance_paid', 'Insurance Paid'),
+            ('partially_paid', 'Partially Paid'),
+            ('closed', 'Closed'),
             ('cancel', 'Cancelled'),
         ],
         default='draft',
         string="Status",
     )
+    
+    # Related Patient Information
+    patient_id_ref = fields.Char(
+        string='Patient ID',
+        related='patient_id.patient_id',
+        readonly=True,
+    )
+    doctor_id = fields.Many2one(
+        comodel_name='hr.employee',
+        string='Doctor',
+        related='appointment_id.doctor_id',
+        store=True,
+        readonly=True,
+    )
+    department_id = fields.Many2one(
+        comodel_name='hr.department',
+        string='Department',
+        related='appointment_id.department_id',
+        store=True,
+        readonly=True,
+    )
+    
+    # Related Insurance Information
+    insurance_case_id = fields.Many2one(
+        comodel_name='insurance.case',
+        string='Insurance Case Number',
+        related='appointment_id.insurance_case_id',
+        store=True,
+        readonly=True,
+    )
+    provider_id = fields.Many2one(
+        comodel_name='clinic.insurance.provider',
+        string='Insurance Provider',
+        related='insurance_case_id.provider_id',
+        store=True,
+        readonly=True,
+    )
+    policy_number = fields.Char(
+        string='Policy Number',
+        related='insurance_case_id.policy_number',
+        store=True,
+        readonly=True,
+    )
+    membership_number = fields.Char(
+        string='Member ID',
+        related='insurance_case_id.membership_number',
+        store=True,
+        readonly=True,
+    )
+    verification_status = fields.Selection(
+        string='Verification Status',
+        related='insurance_case_id.verification_status',
+        store=True,
+        readonly=True,
+    )
+    coverage_status = fields.Selection(
+        string='Coverage Status',
+        related='insurance_case_id.coverage_status',
+        store=True,
+        readonly=True,
+    )
+    copay_percentage = fields.Float(
+        string='Coverage Percentage',
+        related='insurance_case_id.copay_percentage',
+        store=True,
+        readonly=True,
+    )
+    expiry_date = fields.Date(
+        string='Coverage Expiry Date',
+        related='insurance_case_id.expiry_date',
+        store=True,
+        readonly=True,
+    )
+    
+    # Coverage Calculation
+    insurance_amount = fields.Float(
+        string="Insurance Pays",
+        compute='_compute_insurance_amounts',
+        store=True,
+    )
+    patient_amount = fields.Float(
+        string="Patient Pays",
+        compute='_compute_insurance_amounts',
+        store=True,
+    )
+
+    @api.depends('amount', 'insurance_case_id', 'coverage_status', 'copay_percentage', 'appointment_id.payment_type')
+    def _compute_insurance_amounts(self):
+        for rec in self:
+            if rec.appointment_id and rec.appointment_id.payment_type == 'insurance' and rec.insurance_case_id and rec.verification_status == 'verified':
+                if rec.coverage_status == 'covered':
+                    rec.insurance_amount = rec.amount
+                    rec.patient_amount = 0.0
+                elif rec.coverage_status == 'partially':
+                    copay = rec.copay_percentage or 0.0
+                    rec.patient_amount = rec.amount * (copay / 100.0)
+                    rec.insurance_amount = rec.amount - rec.patient_amount
+                elif rec.coverage_status == 'not_covered':
+                    rec.insurance_amount = 0.0
+                    rec.patient_amount = rec.amount
+                else:
+                    rec.insurance_amount = 0.0
+                    rec.patient_amount = rec.amount
+            else:
+                rec.insurance_amount = 0.0
+                rec.patient_amount = rec.amount
 
     @api.depends('billing_line_ids.price_subtotal')
     def _compute_amount(self):
@@ -67,16 +178,75 @@ class HospitalBilling(models.Model):
                 }
                 self.billing_line_ids = [(0, 0, new_line_vals)]
 
+    def _create_triage_request(self):
+        for rec in self:
+            if rec.appointment_id:
+                # Check if a triage request already exists for this appointment
+                existing = self.env['hospital.nurse.triage'].search([('appointment_id', '=', rec.appointment_id.id)], limit=1)
+                if not existing:
+                    self.env['hospital.nurse.triage'].create({
+                        'patient_id': rec.patient_id.id,
+                        'appointment_id': rec.appointment_id.id,
+                        'state': 'draft',
+                    })
+
+    def write(self, vals):
+        res = super(HospitalBilling, self).write(vals)
+        if 'state' in vals and vals['state'] in ('pending_insurance', 'closed', 'patient_paid'):
+            self._create_triage_request()
+        return res
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
             if vals.get('name', '/') == '/':
                 vals['name'] = self.env['ir.sequence'].next_by_code('hospital.billing') or '/'
-        return super(HospitalBilling, self).create(vals_list)
+        records = super(HospitalBilling, self).create(vals_list)
+        for rec in records:
+            if rec.state in ('pending_insurance', 'closed', 'patient_paid'):
+                rec._create_triage_request()
+        return records
+
+    # Workflow Actions / Buttons
+    def action_generate_bill(self):
+        for rec in self:
+            if rec.state == 'draft':
+                if rec.appointment_id.payment_type == 'insurance' and rec.insurance_case_id and rec.verification_status == 'verified':
+                    if rec.patient_amount == 0:
+                        rec.state = 'pending_insurance'
+                    else:
+                        rec.state = 'pending_patient'
+                else:
+                    rec.state = 'pending_patient'
+
+    def action_collect_copayment(self):
+        for rec in self:
+            if rec.state in ('draft', 'pending_patient'):
+                if rec.appointment_id.payment_type == 'insurance' and rec.insurance_case_id and rec.verification_status == 'verified':
+                    if rec.insurance_amount > 0:
+                        rec.state = 'pending_insurance'
+                    else:
+                        rec.state = 'closed'
+                else:
+                    rec.state = 'closed'
+
+    def action_submit_insurance_claim(self):
+        for rec in self:
+            if rec.state in ('draft', 'pending_patient', 'pending_insurance'):
+                rec.state = 'pending_insurance'
+
+    def action_receive_insurance_payment(self):
+        for rec in self:
+            if rec.state in ('pending_insurance', 'partially_paid', 'draft'):
+                rec.state = 'insurance_paid'
+
+    def action_close_bill(self):
+        for rec in self:
+            rec.state = 'closed'
 
     def action_pay(self):
         for rec in self:
-            rec.state = 'paid'
+            rec.state = 'closed'
 
     def action_cancel(self):
         for rec in self:
