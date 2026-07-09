@@ -15,3 +15,4 @@ access_patient_insurance_document_receptionist,patient.insurance.document.recept
 access_patient_insurance_document_admin,patient.insurance.document.admin,model_patient_insurance_document,Clinic_master.group_hms_admin,1,1,1,1
 access_patient_insurance_document_executive,patient.insurance.document.executive,model_patient_insurance_document,group_insurance_executive,1,0,0,0
 access_patient_insurance_document_manager,patient.insurance.document.manager,model_patient_insurance_document,group_insurance_manager,1,0,0,0
+

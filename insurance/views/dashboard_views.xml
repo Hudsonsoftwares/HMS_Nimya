@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Act Window to open Insurance Cases in Kanban grouped by status -->
+    <record id="action_insurance_dashboard" model="ir.actions.act_window">
+        <field name="name">Insurance Dashboard</field>
+        <field name="res_model">insurance.case</field>
+        <field name="view_mode">kanban,form</field>
+        <field name="view_id" ref="view_insurance_case_kanban"/>
+        <field name="search_view_id" ref="view_insurance_case_search"/>
+        <field name="context">{'search_default_group_by_status': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Track your insurance cases verification pipeline here!
+            </p>
+        </field>
+    </record>
+
+    <!-- Dashboard Menu -->
+    <menuitem id="menu_insurance_dashboard"
+              name="Dashboard"
+              parent="insurance_root_menu"
+              action="action_insurance_dashboard"
+              sequence="5"/>
+</odoo>

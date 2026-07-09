@@ -93,6 +93,15 @@ class InsuranceCase(models.Model):
         ('expired', 'Expired'),
     ], string='Verification Status', default='draft')
     
+    priority = fields.Selection([
+        ('0', 'Low'),
+        ('1', 'Normal'),
+        ('2', 'High'),
+        ('3', 'Very High'),
+    ], string='Priority', default='1', index=True)
+    
+    color = fields.Integer(string='Color Index', default=0)
+    
     verification_date = fields.Date(
         string='Verification Date',
         readonly=True,
