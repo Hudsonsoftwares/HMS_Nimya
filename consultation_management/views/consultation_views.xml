@@ -71,6 +71,7 @@
             <form string="Consultation">
                 <header>
                     <button name="action_start" string="Start Consultation" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_trigger_speech_rec" string="🎙️ Record Consultation" type="object" class="oe_highlight" invisible="state != 'consultation'"/>
                     <button name="action_complete" string="Complete Consultation" type="object" class="oe_highlight" invisible="state != 'consultation'"/>
                     <button name="action_cancel" string="Cancel" type="object" invisible="state == 'completed'"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,consultation,completed,cancel"/>
@@ -78,27 +79,6 @@
                 <sheet>
                     <!-- Smart Buttons Section -->
                     <div class="oe_button_box" name="button_box">
-                        <button name="action_generate_prescription" type="object" class="oe_stat_button" icon="fa-pencil-square-o" invisible="state == 'draft'">
-                            <div class="o_stat_info">
-                                <span class="o_stat_text" invisible="prescription_generated">Draft</span>
-                                <span class="o_stat_text" invisible="not prescription_generated">Generated ✅</span>
-                                <span class="o_stat_value">Prescription</span>
-                            </div>
-                        </button>
-                        <button name="action_generate_lab" type="object" class="oe_stat_button" icon="fa-flask" invisible="state == 'draft'">
-                            <div class="o_stat_info">
-                                <span class="o_stat_text" invisible="lab_request_generated">Draft</span>
-                                <span class="o_stat_text" invisible="not lab_request_generated">Generated ✅</span>
-                                <span class="o_stat_value">Lab Request</span>
-                            </div>
-                        </button>
-                        <button name="action_generate_radiology" type="object" class="oe_stat_button" icon="fa-film" invisible="state == 'draft'">
-                            <div class="o_stat_info">
-                                <span class="o_stat_text" invisible="radiology_generated">Draft</span>
-                                <span class="o_stat_text" invisible="not radiology_generated">Generated ✅</span>
-                                <span class="o_stat_value">Radiology</span>
-                            </div>
-                        </button>
                         <button name="action_view_dummy" type="object" class="oe_stat_button" icon="fa-money">
                             <div class="o_stat_info">
                                 <span class="o_stat_text">View Patient</span>
@@ -111,90 +91,73 @@
                                 <span class="o_stat_value">Insurance</span>
                             </div>
                         </button>
-                        <button name="action_view_dummy" type="object" class="oe_stat_button" icon="fa-history">
-                            <div class="o_stat_info">
-                                <span class="o_stat_text">Medical</span>
-                                <span class="o_stat_value">History</span>
-                            </div>
+                        <button name="action_view_medical_history" type="object" class="oe_stat_button" icon="fa-history" invisible="not patient_id">
+                            <field name="previous_visits_count" widget="statinfo" string="Visits"/>
                         </button>
-                        <button name="action_view_dummy" type="object" class="oe_stat_button" icon="fa-calendar">
+                        <button name="action_view_appointment" type="object" class="oe_stat_button" icon="fa-calendar" invisible="not appointment_id">
                             <div class="o_stat_info">
-                                <span class="o_stat_text">Previous</span>
-                                <span class="o_stat_value">Visits</span>
+                                <span class="o_stat_text">Appointment</span>
+                                <span class="o_stat_value">Details</span>
                             </div>
                         </button>
                     </div>
 
-                    <div class="oe_title" style="margin-bottom: 20px;">
-                        <h1>
-                            <field name="name"/>
+                    <div class="oe_title" style="margin-bottom: 20px; display: inline-block; width: 100%;">
+                        <h1 style="margin: 0; padding: 0;">
+                            <span style="font-weight: bold; color: #1e293b; display: inline-block; vertical-align: middle;">
+                                <field name="patient_name" class="oe_inline" readonly="1"/>
+                            </span>
+                            <span style="font-size: 18px; font-weight: normal; color: #64748b; margin-left: 10px; display: inline-block; vertical-align: middle; font-family: sans-serif;">
+                                (<field name="name" class="oe_inline" readonly="1"/>)
+                            </span>
                         </h1>
                     </div>
 
-                    <!-- Row 1: Patient and Appointment Info -->
-                    <group>
-                        <group string="Patient Details">
-                            <field name="patient_id"/>
-                            <field name="patient_id_ref"/>
-                            <field name="patient_name"/>
-                            <field name="patient_age"/>
-                            <field name="patient_gender"/>
-                            <field name="patient_blood_group"/>
-                            <field name="patient_phone"/>
-                        </group>
-                        <group string="Appointment Details">
-                            <field name="appointment_id"/>
-                            <field name="appointment_name"/>
-                            <field name="token_number"/>
-                            <field name="department_id"/>
-                            <field name="doctor_id"/>
-                            <field name="visit_date"/>
-                            <field name="appointment_time" widget="float_time"/>
-                            <field name="priority" widget="badge"/>
-                        </group>
-                    </group>
-
-                    <!-- Row 2: Nurse Triage Vitals -->
-                    <group string="Nurse Triage Vitals" invisible="not triage_id">
-                        <group>
-                            <field name="triage_id"/>
-                            <field name="temperature"/>
-                            <label for="systolic_bp" string="Blood Pressure"/>
-                            <div class="o_row">
-                                <field name="systolic_bp" class="oe_inline"/> / 
-                                <field name="diastolic_bp" class="oe_inline"/> mmHg
-                            </div>
-                            <field name="pulse_rate"/>
-                            <field name="respiratory_rate"/>
-                        </group>
-                        <group>
-                            <field name="spo2"/>
-                            <field name="weight"/>
-                            <field name="height"/>
-                            <field name="bmi"/>
-                            <field name="blood_sugar"/>
-                            <field name="allergies"/>
-                        </group>
-                    </group>
-
-                    <!-- Row 3: Previous Medical History -->
-                    <group string="Previous Medical History (Last 5 Visits)">
-                        <field name="previous_consultation_ids" nolabel="1" colspan="2" readonly="1">
-                            <list create="false" edit="false" delete="false">
-                                <field name="name" string="Record Number" decoration-bf="1"/>
-                                <field name="visit_date"/>
-                                <field name="diagnosis"/>
-                                <field name="treatment_plan" string="Medicines &amp; Treatment"/>
-                                <field name="lab_request_generated" string="Lab Requested?" widget="boolean"/>
-                                <field name="radiology_generated" string="Radiology Requested?" widget="boolean"/>
-                            </list>
-                        </field>
-                    </group>
-
-                    <!-- Row 4: Main Consultation Work Area -->
-                    <notebook>
-                        <page string="Consultation Details" name="consultation_details">
+                    <!-- Row 1: Patient Details (Beautifully styled card) -->
+                    <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; border-radius: 6px; padding: 15px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <group string="Patient Details" style="margin: 0;">
                             <group>
+                                <field name="patient_id" readonly="1"/>
+                                <field name="patient_id_ref" readonly="1"/>
+                                <field name="patient_name" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="patient_age" string="Age" readonly="1"/>
+                                <field name="patient_gender" string="Gender" readonly="1"/>
+                                <field name="patient_blood_group" string="Blood Group" readonly="1"/>
+                                <field name="patient_phone" string="Contact" readonly="1"/>
+                            </group>
+                        </group>
+                    </div>
+
+                    <!-- Main Consultation Notebook Area (Vitals -> Examination -> Diagnosis -> Action) -->
+                    <notebook>
+                        <page string="Triage Details" name="triage_details" invisible="not triage_id">
+                            <group>
+                                <group string="Basic Vitals">
+                                    <field name="triage_id" readonly="1"/>
+                                    <field name="temperature" readonly="1"/>
+                                    <label for="systolic_bp" string="Blood Pressure"/>
+                                    <div class="o_row">
+                                        <field name="systolic_bp" class="oe_inline" readonly="1"/> / 
+                                        <field name="diastolic_bp" class="oe_inline" readonly="1"/> mmHg
+                                    </div>
+                                    <field name="pulse_rate" readonly="1"/>
+                                    <field name="respiratory_rate" readonly="1"/>
+                                </group>
+                                <group string="Other Metrics &amp; Allergies">
+                                    <field name="spo2" readonly="1"/>
+                                    <field name="weight" readonly="1"/>
+                                    <field name="height" readonly="1"/>
+                                    <field name="bmi" readonly="1"/>
+                                    <field name="blood_sugar" readonly="1"/>
+                                    <field name="allergies" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+                        
+                        <page string="Consultation Details" name="consultation_details">
+                            <group string="Clinical Examination &amp; Notes">
                                 <field name="chief_complaint" placeholder="Chief Complaint..." readonly="state == 'completed'"/>
                                 <field name="history_present_illness" placeholder="History of Present Illness..." readonly="state == 'completed'"/>
                                 <field name="examination" placeholder="Physical Examination details..." readonly="state == 'completed'"/>
@@ -202,54 +165,65 @@
                                 <field name="icd_code" placeholder="ICD-10 Code..." readonly="state == 'completed'"/>
                                 <field name="treatment_plan" placeholder="Medicines, Dosage, Treatment Plan..." readonly="state == 'completed'"/>
                             </group>
+
+                            <group string="🔬 Requested Lab Tests" style="margin-top: 20px;">
+                                <field name="lab_line_ids" readonly="state == 'completed'" nolabel="1" colspan="2">
+                                    <list editable="bottom" limit="5">
+                                        <field name="test_name" placeholder="e.g. Complete Blood Count (CBC)"/>
+                                        <field name="instruction" placeholder="e.g. Fasting required"/>
+                                        <field name="urgency" widget="badge" decoration-danger="urgency == 'urgent'" decoration-info="urgency == 'normal'"/>
+                                    </list>
+                                </field>
+                            </group>
+
+                            <group string="💊 Prescribed Medicines" style="margin-top: 20px;">
+                                <field name="medicine_line_ids" readonly="state == 'completed'" nolabel="1" colspan="2">
+                                    <list editable="bottom" limit="5">
+                                        <field name="product_id" options="{'no_create': True, 'no_open': True}"/>
+                                        <field name="dosage" placeholder="e.g. 1-0-1"/>
+                                        <field name="duration" placeholder="e.g. 5 Days"/>
+                                        <field name="notes" placeholder="e.g. Take after food"/>
+                                    </list>
+                                </field>
+                            </group>
                         </page>
-                        <page string="Prescription / Medicines" name="prescription_medicines">
-                            <field name="medicine_line_ids" readonly="state == 'completed'">
-                                <list editable="bottom">
-                                    <field name="product_id" options="{'no_create': True, 'no_open': True}"/>
-                                    <field name="dosage" placeholder="e.g. 1-0-1"/>
-                                    <field name="duration" placeholder="e.g. 5 Days"/>
-                                    <field name="notes" placeholder="e.g. Take after food"/>
-                                </list>
-                            </field>
-                        </page>
+
                         <page string="Orders / Referrals" name="orders_requests">
-                            <group string="Referral to Another Doctor">
-                                <group>
-                                    <field name="referral_doctor_id" placeholder="Select Doctor..." readonly="state == 'completed'"/>
-                                </group>
-                                <group>
-                                    <field name="referral_reason" placeholder="Referral reason..." readonly="state == 'completed'"/>
-                                </group>
-                            </group>
-                            <group string="Admission Request">
-                                <group>
-                                    <field name="admission_required" readonly="state == 'completed'"/>
-                                </group>
-                                <group>
-                                    <field name="admission_notes" placeholder="Reasons/notes for hospital admission..." readonly="state == 'completed'" invisible="not admission_required"/>
-                                </group>
-                            </group>
+                            <div style="padding: 10px 0;">
+                                <details style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; margin-bottom: 12px; background-color: #f8fafc;">
+                                    <summary style="font-weight: bold; cursor: pointer; color: #475569; outline: none;">👨‍⚕️ Referral to Another Doctor (Click to expand)</summary>
+                                    <group style="margin-top: 10px; margin-bottom: 0;">
+                                        <field name="referral_doctor_id" placeholder="Select Doctor..." readonly="state == 'completed'"/>
+                                        <field name="referral_reason" placeholder="Referral reason..." readonly="state == 'completed'"/>
+                                    </group>
+                                </details>
+                                
+                                <details style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; background-color: #f8fafc;">
+                                    <summary style="font-weight: bold; cursor: pointer; color: #475569; outline: none;">🏥 Hospital Admission Request (Click to expand)</summary>
+                                    <group style="margin-top: 10px; margin-bottom: 0;">
+                                        <field name="admission_required" readonly="state == 'completed'"/>
+                                        <field name="admission_notes" placeholder="Reasons/notes for hospital admission..." readonly="state == 'completed'" invisible="not admission_required"/>
+                                    </group>
+                                </details>
+                            </div>
                         </page>
-                        <page string="AI Documents" name="ai_documents" invisible="state == 'draft'">
-                            <header style="margin-bottom: 20px;">
+                        <page string="Medical Certificates" name="medical_certificates">
+                            <div style="margin-bottom: 15px; display: flex; gap: 10px;">
                                 <button name="action_generate_ai_referral" string="Generate Referral Letter" type="object" class="oe_highlight"/>
                                 <button name="action_generate_ai_fitness" string="Generate Fitness Certificate" type="object" class="oe_highlight"/>
                                 <button name="action_generate_ai_medical" string="Generate Medical Certificate" type="object" class="oe_highlight"/>
-                            </header>
-                            <group>
-                                <notebook style="width: 100%;">
-                                    <page string="Referral Letter">
-                                        <field name="ai_referral_letter" widget="html" placeholder="AI generated referral letter will appear here..."/>
-                                    </page>
-                                    <page string="Fitness Certificate">
-                                        <field name="ai_fitness_certificate" widget="html" placeholder="AI generated fitness certificate will appear here..."/>
-                                    </page>
-                                    <page string="Medical Certificate">
-                                        <field name="ai_medical_certificate" widget="html" placeholder="AI generated medical certificate will appear here..."/>
-                                    </page>
-                                </notebook>
-                            </group>
+                            </div>
+                            <div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+                                <span style="font-weight: bold; color: #475569; font-size: 14px; display: block; margin-bottom: 8px;">📋 Generated Documents History</span>
+                                <field name="document_ids" readonly="1" nolabel="1" colspan="2">
+                                    <list create="false" edit="false" delete="false">
+                                        <field name="date_generated" string="Date"/>
+                                        <field name="title" string="Document Title"/>
+                                        <field name="document_type" string="Type"/>
+                                        <button name="action_open_document_preview" string="👁️ View/Print" type="object" class="btn-secondary btn-sm"/>
+                                    </list>
+                                </field>
+                            </div>
                         </page>
                         <page string="Doctor Notes" name="doctor_notes">
                             <group>
@@ -532,5 +506,60 @@
         parent="menu_consultation_reports"
         action="action_report_followups"
         sequence="40"/>
+    <!-- Speech Translation Wizard Form View -->
+    <record id="view_consultation_speech_wizard_form" model="ir.ui.view">
+        <field name="name">consultation.speech.wizard.form</field>
+        <field name="model">consultation.speech.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Speech Translation Wizard">
+                <sheet>
+                    <group>
+                        <field name="speech_language" widget="radio" options="{'horizontal': true}"/>
+                    </group>
+                    <field name="voice_recorder_html" widget="html" nolabel="1"/>
+                    <group>
+                        <field name="raw_transcript" placeholder="Transcribed text will appear here... (You can also edit this text manually if needed)" style="height: 100px;"/>
+                        <field name="english_summary" placeholder="Click 'Translate &amp; Summarize' to generate the English translation..." style="height: 100px;"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_translate_summarize" string="Translate &amp; Summarize" type="object" class="btn-primary"/>
+                    <button name="action_confirm_insert" string="Confirm &amp; Insert into Notes" type="object" class="btn-success" invisible="not english_summary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_consultation_document_wizard_form" model="ir.ui.view">
+        <field name="name">consultation.document.wizard.form</field>
+        <field name="model">consultation.document.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Send, Print &amp; Save Document">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="document_title" style="font-weight: bold; font-size: 16px;" placeholder="Document Title"/>
+                            <field name="document_type" invisible="1"/>
+                            <field name="consultation_id" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="patient_email" placeholder="patient@example.com"/>
+                        </group>
+                    </group>
+                    <div style="margin-top: 15px; margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: #475569; display: block; margin-bottom: 5px;">Document Content:</span>
+                        <field name="content" widget="html" style="border: 1px solid #cbd5e1; border-radius: 6px;"/>
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="action_print" string="🖨️ Print" type="object" class="btn-primary"/>
+                    <button name="action_send_email" string="✉️ Send Email &amp; Save" type="object" class="btn-success"/>
+                    <button name="action_save" string="💾 Save to History" type="object" class="btn-secondary"/>
+                    <button string="Discard" class="btn-link" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
 
 </odoo>

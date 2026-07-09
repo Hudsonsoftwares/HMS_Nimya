@@ -24,4 +24,9 @@
 
     'installable': True,
     'application': True,
+    'assets': {
+        'web.assets_backend': [
+            'consultation_management/static/src/js/speech_recognition.js',
+        ],
+    },
 }
