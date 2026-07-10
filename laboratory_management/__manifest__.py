@@ -10,10 +10,16 @@
         'base',
         'mail',
         'contacts',
+        'Clinic_master',
+        'hr',
+        'product',
+        'maintenance',
     ],
 
     'data': [
         'security/ir.model.access.csv',
+        'data/laboratory_sequence.xml',
+        'report/laboratory_report_templates.xml',
         'views/laboratory_views.xml',
     ],
 

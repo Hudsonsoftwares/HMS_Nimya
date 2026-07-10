@@ -1,2 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_hospital_laboratory,hospital.laboratory,model_hospital_laboratory,,1,1,1,1
+access_laboratory_test,laboratory.test,model_laboratory_test,,1,1,1,1
+access_laboratory_sample,laboratory.sample,model_laboratory_sample,,1,1,1,1
+access_laboratory_result,laboratory.result,model_laboratory_result,,1,1,1,1
+access_laboratory_dashboard,laboratory.dashboard,model_laboratory_dashboard,,1,1,1,1

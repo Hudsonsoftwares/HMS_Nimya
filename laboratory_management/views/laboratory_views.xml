@@ -1,51 +1,720 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
 
-    <!-- Tree View -->
-    <record id="view_hospital_laboratory_tree" model="ir.ui.view">
-        <field name="name">hospital.laboratory.tree</field>
-        <field name="model">hospital.laboratory</field>
+    <!-- ACTIONS FOR MENUS FIRST -->
+    
+    <!-- 1. Lab Request Action -->
+    <record id="action_hospital_laboratory" model="ir.actions.act_window">
+        <field name="name">Lab Requests</field>
+        <field name="res_model">hospital.laboratory</field>
+        <field name="view_mode">list,kanban,form,pivot,graph</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create and track patient laboratory requests.
+            </p>
+        </field>
+    </record>
+
+    <!-- 2. Sample Collection Action -->
+    <record id="action_laboratory_sample" model="ir.actions.act_window">
+        <field name="name">Sample Collections</field>
+        <field name="res_model">laboratory.sample</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Manage collected patient samples.
+            </p>
+        </field>
+    </record>
+
+    <!-- 3. Test Results Action -->
+    <record id="action_laboratory_result" model="ir.actions.act_window">
+        <field name="name">Test Results</field>
+        <field name="res_model">laboratory.result</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Verify and record test results.
+            </p>
+        </field>
+    </record>
+
+    <!-- 4. Lab Tests Catalog Action -->
+    <record id="action_laboratory_test" model="ir.actions.act_window">
+        <field name="name">Lab Tests Catalog</field>
+        <field name="res_model">laboratory.test</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Define the laboratory tests, reference ranges, and service products.
+            </p>
+        </field>
+    </record>
+
+    <!-- 5. Lab Equipments Action (pointing to maintenance.equipment) -->
+    <record id="action_laboratory_equipment" model="ir.actions.act_window">
+        <field name="name">Laboratory Equipments</field>
+        <field name="res_model">maintenance.equipment</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="domain">[('is_lab_equipment', '=', True)]</field>
+        <field name="context">{'default_is_lab_equipment': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add and manage laboratory equipments integrated with maintenance.
+            </p>
+        </field>
+    </record>
+
+    <!-- 6. Server Action to Open Laboratory Dashboard -->
+    <record id="action_laboratory_dashboard_server" model="ir.actions.server">
+        <field name="name">Laboratory Dashboard</field>
+        <field name="model_id" ref="model_laboratory_dashboard"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.action_open_dashboard()
+        </field>
+    </record>
+
+    <!-- 7. Pivot/Graph Actions for Reporting -->
+    <record id="action_laboratory_request_pivot" model="ir.actions.act_window">
+        <field name="name">Request Analysis</field>
+        <field name="res_model">hospital.laboratory</field>
+        <field name="view_mode">pivot,graph</field>
+    </record>
+
+    <record id="action_laboratory_result_pivot" model="ir.actions.act_window">
+        <field name="name">Result Analysis</field>
+        <field name="res_model">laboratory.result</field>
+        <field name="view_mode">pivot,graph</field>
+    </record>
+
+
+    <!-- INHERITED VIEWS -->
+
+    <!-- Inherit Maintenance Equipment Form to show Is Lab Equipment -->
+    <record id="view_maintenance_equipment_form_inherit" model="ir.ui.view">
+        <field name="name">maintenance.equipment.form.inherit</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="inherit_id" ref="maintenance.hr_equipment_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field name="is_lab_equipment"/>
+            </xpath>
+        </field>
+    </record>
+
+
+    <!-- LAB TESTS CATALOG VIEWS -->
+
+    <record id="view_laboratory_test_list" model="ir.ui.view">
+        <field name="name">laboratory.test.list</field>
+        <field name="model">laboratory.test</field>
         <field name="arch" type="xml">
             <list>
+                <field name="code"/>
                 <field name="name"/>
+                <field name="category"/>
+                <field name="cost"/>
+                <field name="normal_range"/>
+                <field name="unit"/>
+                <field name="active" widget="boolean_toggle"/>
             </list>
         </field>
     </record>
 
-    <!-- Form View -->
+    <record id="view_laboratory_test_form" model="ir.ui.view">
+        <field name="name">laboratory.test.form</field>
+        <field name="model">laboratory.test</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="Complete Blood Count (CBC)"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code" placeholder="CBC"/>
+                            <field name="category"/>
+                            <field name="cost"/>
+                        </group>
+                        <group>
+                            <field name="normal_range" placeholder="e.g. 4.5 - 11.0"/>
+                            <field name="unit" placeholder="e.g. x10^3/uL"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description" placeholder="Provide test instructions, preparation guides, or information here..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <!-- LAB REQUEST VIEWS -->
+
+    <record id="view_hospital_laboratory_list" model="ir.ui.view">
+        <field name="name">hospital.laboratory.list</field>
+        <field name="model">hospital.laboratory</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="patient_id"/>
+                <field name="patient_ref"/>
+                <field name="doctor_id"/>
+                <field name="request_date"/>
+                <field name="state" widget="badge" 
+                       decoration-info="state == 'draft'" 
+                       decoration-warning="state == 'requested' or state == 'sample_collected'"
+                       decoration-muted="state == 'cancelled'"
+                       decoration-primary="state == 'testing'"
+                       decoration-success="state == 'completed'"/>
+            </list>
+        </field>
+    </record>
+
     <record id="view_hospital_laboratory_form" model="ir.ui.view">
         <field name="name">hospital.laboratory.form</field>
         <field name="model">hospital.laboratory</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <button name="action_request" string="Confirm Request" type="object" class="btn btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_collect_sample" string="Collect Samples" type="object" class="btn btn-primary" invisible="state != 'requested'"/>
+                    <button name="action_start_testing" string="Start Testing" type="object" class="btn btn-primary" invisible="state != 'sample_collected'"/>
+                    <button name="action_complete" string="Complete Lab Request" type="object" class="btn btn-success" invisible="state != 'testing'"/>
+                    <button name="action_cancel" string="Cancel" type="object" class="btn btn-secondary" invisible="state in ('completed', 'cancelled')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,requested,sample_collected,testing,completed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="patient_id" readonly="state != 'draft'"/>
+                            <field name="patient_ref"/>
+                            <field name="doctor_id" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="request_date" readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Requested Tests">
+                            <field name="test_ids" readonly="state != 'draft'">
+                                <list>
+                                    <field name="code"/>
+                                    <field name="name"/>
+                                    <field name="category"/>
+                                    <field name="cost"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Samples Collected" invisible="state == 'draft'">
+                            <field name="sample_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="sample_type" widget="badge"/>
+                                    <field name="collection_date"/>
+                                    <field name="collected_by"/>
+                                    <field name="state" widget="badge" 
+                                           decoration-warning="state == 'pending'"
+                                           decoration-info="state == 'collected'"
+                                           decoration-success="state == 'processed'"
+                                           decoration-danger="state == 'rejected'"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Test Results" invisible="state in ('draft', 'requested')">
+                            <field name="result_ids">
+                                <list editable="bottom" create="false" delete="false">
+                                    <field name="test_id" readonly="1"/>
+                                    <field name="result_value" readonly="parent.state == 'completed'"/>
+                                    <field name="normal_range"/>
+                                    <field name="unit"/>
+                                    <field name="remarks" readonly="parent.state == 'completed'"/>
+                                    <field name="state" widget="badge" decoration-success="state == 'verified'" decoration-danger="state == 'draft'"/>
+                                    <button name="action_verify" type="object" string="Verify" class="btn btn-success btn-sm" invisible="state == 'verified' or parent.state == 'completed'"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Internal Notes">
+                            <field name="notes" placeholder="Internal remarks, patient clinical details..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_hospital_laboratory_kanban" model="ir.ui.view">
+        <field name="name">hospital.laboratory.kanban</field>
+        <field name="model">hospital.laboratory</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column" create="false">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="patient_id"/>
+                <field name="doctor_id"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_card oe_kanban_global_click shadow-sm border-start border-4">
+                            <div class="oe_kanban_content">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title" style="font-size: 15px;"><field name="name"/></strong>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_body my-1">
+                                    <div class="text-muted"><i class="fa fa-user me-1"/> <field name="patient_id"/></div>
+                                    <div class="text-muted" t-if="record.doctor_id.raw_value"><i class="fa fa-user-md me-1"/> <field name="doctor_id"/></div>
+                                </div>
+                                <div class="o_kanban_record_bottom d-flex justify-content-between align-items-center mt-2 border-top pt-2">
+                                    <field name="request_date" widget="date"/>
+                                    <span class="badge rounded-pill bg-info text-white" t-if="record.state.raw_value == 'draft'">Draft</span>
+                                    <span class="badge rounded-pill bg-warning text-dark" t-if="record.state.raw_value in ('requested', 'sample_collected')">Pending</span>
+                                    <span class="badge rounded-pill bg-primary text-white" t-if="record.state.raw_value == 'testing'">Testing</span>
+                                    <span class="badge rounded-pill bg-success text-white" t-if="record.state.raw_value == 'completed'">Done</span>
+                                    <span class="badge rounded-pill bg-danger text-white" t-if="record.state.raw_value == 'cancelled'">Cancelled</span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Lab Request Search View -->
+    <record id="view_hospital_laboratory_search" model="ir.ui.view">
+        <field name="name">hospital.laboratory.search</field>
+        <field name="model">hospital.laboratory</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Request ID"/>
+                <field name="patient_id"/>
+                <field name="doctor_id"/>
+                <filter name="filter_draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="filter_pending" string="Pending/Requested" domain="[('state', 'in', ('requested', 'sample_collected'))]"/>
+                <filter name="filter_testing" string="Testing" domain="[('state', '=', 'testing')]"/>
+                <filter name="filter_completed" string="Completed" domain="[('state', '=', 'completed')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_patient" string="Patient" context="{'group_by': 'patient_id'}"/>
+                    <filter name="group_by_doctor" string="Prescribing Doctor" context="{'group_by': 'doctor_id'}"/>
+                    <filter name="group_by_status" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Pivot and Graph views for Lab Request Reporting -->
+    <record id="view_hospital_laboratory_pivot" model="ir.ui.view">
+        <field name="name">hospital.laboratory.pivot</field>
+        <field name="model">hospital.laboratory</field>
+        <field name="arch" type="xml">
+            <pivot string="Request Analysis">
+                <field name="request_date" type="row" interval="month"/>
+                <field name="state" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_hospital_laboratory_graph" model="ir.ui.view">
+        <field name="name">hospital.laboratory.graph</field>
+        <field name="model">hospital.laboratory</field>
+        <field name="arch" type="xml">
+            <graph string="Request Analysis" type="bar">
+                <field name="request_date" type="row" interval="month"/>
+                <field name="state" type="col"/>
+            </graph>
+        </field>
+    </record>
+
+
+    <!-- SAMPLES VIEWS -->
+
+    <record id="view_laboratory_sample_list" model="ir.ui.view">
+        <field name="name">laboratory.sample.list</field>
+        <field name="model">laboratory.sample</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="request_id"/>
+                <field name="patient_id"/>
+                <field name="sample_type" widget="badge"/>
+                <field name="collection_date"/>
+                <field name="collected_by"/>
+                <field name="state" widget="badge" 
+                       decoration-warning="state == 'pending'"
+                       decoration-info="state == 'collected'"
+                       decoration-success="state == 'processed'"
+                       decoration-danger="state == 'rejected'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_laboratory_sample_form" model="ir.ui.view">
+        <field name="name">laboratory.sample.form</field>
+        <field name="model">laboratory.sample</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_collect" string="Mark Collected" type="object" class="btn btn-primary" invisible="state != 'pending'"/>
+                    <button name="action_process" string="Mark Processed" type="object" class="btn btn-success" invisible="state != 'collected'"/>
+                    <button name="action_reject" string="Reject Sample" type="object" class="btn btn-danger" invisible="state not in ('pending', 'collected')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,collected,processed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="request_id" readonly="1"/>
+                            <field name="patient_id"/>
+                            <field name="sample_type" readonly="state != 'pending'"/>
+                        </group>
+                        <group>
+                            <field name="collection_date" readonly="state != 'pending'"/>
+                            <field name="collected_by" readonly="state != 'pending'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Associated Tests">
+                            <field name="test_ids" readonly="1">
+                                <list>
+                                    <field name="code"/>
+                                    <field name="name"/>
+                                    <field name="category"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes">
+                            <field name="notes" placeholder="Notes on sample quality, temperature, storage etc..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_laboratory_sample_kanban" model="ir.ui.view">
+        <field name="name">laboratory.sample.kanban</field>
+        <field name="model">laboratory.sample</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column" create="false">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="patient_id"/>
+                <field name="sample_type"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_card oe_kanban_global_click shadow-sm border-start border-4">
+                            <div class="oe_kanban_content">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title" style="font-size: 15px;"><field name="name"/></strong>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_body my-1">
+                                    <div class="text-muted"><i class="fa fa-user me-1"/> <field name="patient_id"/></div>
+                                    <div class="text-muted"><i class="fa fa-flask me-1"/> Type: <span class="badge bg-secondary text-white" t-out="record.sample_type.value"/></div>
+                                </div>
+                                <div class="o_kanban_record_bottom d-flex justify-content-between align-items-center mt-2 border-top pt-2">
+                                    <field name="collection_date" widget="datetime"/>
+                                    <span class="badge rounded-pill bg-warning text-dark" t-if="record.state.raw_value == 'pending'">Pending</span>
+                                    <span class="badge rounded-pill bg-info text-white" t-if="record.state.raw_value == 'collected'">Collected</span>
+                                    <span class="badge rounded-pill bg-success text-white" t-if="record.state.raw_value == 'processed'">Processed</span>
+                                    <span class="badge rounded-pill bg-danger text-white" t-if="record.state.raw_value == 'rejected'">Rejected</span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+
+    <!-- RESULTS VIEWS -->
+
+    <record id="view_laboratory_result_list" model="ir.ui.view">
+        <field name="name">laboratory.result.list</field>
+        <field name="model">laboratory.result</field>
+        <field name="arch" type="xml">
+            <list create="false" delete="false">
+                <field name="request_id"/>
+                <field name="patient_id"/>
+                <field name="test_id"/>
+                <field name="result_value"/>
+                <field name="normal_range"/>
+                <field name="unit"/>
+                <field name="state" widget="badge" decoration-success="state == 'verified'" decoration-danger="state == 'draft'"/>
+                <button name="action_verify" type="object" string="Verify" class="btn btn-success btn-sm" invisible="state == 'verified'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_laboratory_result_form" model="ir.ui.view">
+        <field name="name">laboratory.result.form</field>
+        <field name="model">laboratory.result</field>
+        <field name="arch" type="xml">
+            <form create="false" delete="false">
+                <header>
+                    <button name="action_verify" string="Verify Result" type="object" class="btn btn-success" invisible="state == 'verified'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,verified"/>
+                </header>
                 <sheet>
                     <group>
-                        <field name="name"/>
+                        <group>
+                            <field name="request_id" readonly="1"/>
+                            <field name="patient_id"/>
+                            <field name="test_id" readonly="1"/>
+                            <field name="result_value" readonly="state == 'verified'"/>
+                        </group>
+                        <group>
+                            <field name="normal_range"/>
+                            <field name="unit"/>
+                            <field name="verified_by"/>
+                            <field name="verification_date"/>
+                        </group>
+                    </group>
+                    <group string="Remarks">
+                        <field name="remarks" placeholder="Enter clinical remarks or comments here..." readonly="state == 'verified'"/>
                     </group>
                 </sheet>
             </form>
         </field>
     </record>
 
-    <!-- Action -->
-    <record id="action_hospital_laboratory" model="ir.actions.act_window">
-        <field name="name">Laboratory</field>
-        <field name="res_model">hospital.laboratory</field>
-        <field name="view_mode">list,form</field>
+    <!-- Pivot and Graph views for Lab Results Reporting -->
+    <record id="view_laboratory_result_pivot" model="ir.ui.view">
+        <field name="name">laboratory.result.pivot</field>
+        <field name="model">laboratory.result</field>
+        <field name="arch" type="xml">
+            <pivot string="Result Analysis">
+                <field name="test_id" type="row"/>
+                <field name="state" type="col"/>
+            </pivot>
+        </field>
     </record>
+
+    <record id="view_laboratory_result_graph" model="ir.ui.view">
+        <field name="name">laboratory.result.graph</field>
+        <field name="model">laboratory.result</field>
+        <field name="arch" type="xml">
+            <graph string="Result Analysis" type="bar">
+                <field name="test_id" type="row"/>
+                <field name="state" type="col"/>
+            </graph>
+        </field>
+    </record>
+
+
+    <!-- DASHBOARD VIEW -->
+
+    <record id="view_laboratory_dashboard_form" model="ir.ui.view">
+        <field name="name">laboratory.dashboard.form</field>
+        <field name="model">laboratory.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="Laboratory Dashboard" create="false" edit="false" delete="false">
+                <sheet>
+                    <div style="font-size: 26px; font-weight: bold; color: #0284c7; margin-bottom: 25px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                        <span>Laboratory Dashboard</span>
+                        <button name="%(action_hospital_laboratory)d" type="action" string="View All Requests" class="btn btn-primary btn-sm"/>
+                    </div>
+
+                    <!-- KPI Cards Row 1 -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; justify-content: space-between;">
+                        <!-- Card 1: Today's Requests -->
+                        <div style="flex: 1; min-width: 220px; background: #e0f2fe; border-left: 5px solid #0284c7; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 13px; font-weight: bold; color: #0369a1; text-transform: uppercase;">Requests Today</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #0284c7; margin-top: 5px;"><field name="total_requests"/></div>
+                        </div>
+                        <!-- Card 2: Pending Requests -->
+                        <div style="flex: 1; min-width: 220px; background: #fef3c7; border-left: 5px solid #d97706; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 13px; font-weight: bold; color: #b45309; text-transform: uppercase;">Pending Requests</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #d97706; margin-top: 5px;"><field name="pending_requests"/></div>
+                        </div>
+                        <!-- Card 3: In Testing -->
+                        <div style="flex: 1; min-width: 220px; background: #f3e8ff; border-left: 5px solid #9333ea; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 13px; font-weight: bold; color: #6b21a8; text-transform: uppercase;">In Testing</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #9333ea; margin-top: 5px;"><field name="testing_requests"/></div>
+                        </div>
+                    </div>
+
+                    <!-- KPI Cards Row 2 -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; justify-content: space-between;">
+                        <!-- Card 4: Completed -->
+                        <div style="flex: 1; min-width: 220px; background: #dcfce7; border-left: 5px solid #16a34a; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 13px; font-weight: bold; color: #15803d; text-transform: uppercase;">Completed Today</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #16a34a; margin-top: 5px;"><field name="completed_requests"/></div>
+                        </div>
+                        <!-- Card 5: Lab Equipments -->
+                        <div style="flex: 1; min-width: 220px; background: #ccfbf1; border-left: 5px solid #0d9488; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 13px; font-weight: bold; color: #0f766e; text-transform: uppercase;">Active Lab Equipments</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #0d9488; margin-top: 5px;"><field name="active_equipments"/></div>
+                        </div>
+                        <!-- Card 6: Active Tests -->
+                        <div style="flex: 1; min-width: 220px; background: #f1f5f9; border-left: 5px solid #475569; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <div style="font-size: 13px; font-weight: bold; color: #334155; text-transform: uppercase;">Total Active Tests</div>
+                            <div style="font-size: 34px; font-weight: 800; color: #475569; margin-top: 5px;"><field name="total_tests"/></div>
+                        </div>
+                    </div>
+
+                    <!-- Tabs/Lists Section -->
+                    <notebook>
+                        <page string="Recent Lab Requests" name="recent_requests_tab">
+                            <field name="recent_request_ids" readonly="1">
+                                <list create="false" edit="false" delete="false">
+                                    <field name="name" decoration-bf="1"/>
+                                    <field name="patient_id"/>
+                                    <field name="request_date"/>
+                                    <field name="doctor_id"/>
+                                    <field name="state" widget="badge" 
+                                           decoration-info="state == 'draft'" 
+                                           decoration-warning="state == 'requested' or state == 'sample_collected'"
+                                           decoration-muted="state == 'cancelled'"
+                                           decoration-primary="state == 'testing'"
+                                           decoration-success="state == 'completed'"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Pending Sample Collections" name="pending_samples_tab">
+                            <field name="pending_sample_ids" readonly="1">
+                                <list create="false" edit="false" delete="false">
+                                    <field name="name" decoration-bf="1"/>
+                                    <field name="request_id"/>
+                                    <field name="patient_id"/>
+                                    <field name="sample_type" widget="badge"/>
+                                    <field name="collection_date"/>
+                                    <field name="state" widget="badge" decoration-warning="state == 'pending'"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Pending Results Verification" name="recent_results_tab">
+                            <field name="recent_result_ids" readonly="1">
+                                <list create="false" edit="false" delete="false">
+                                    <field name="request_id"/>
+                                    <field name="patient_id"/>
+                                    <field name="test_id"/>
+                                    <field name="result_value" decoration-bf="1"/>
+                                    <field name="normal_range"/>
+                                    <field name="unit"/>
+                                    <field name="state" widget="badge" decoration-danger="state == 'draft'"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <!-- MENUS AND NAVIGATION -->
 
     <!-- Root Menu -->
     <menuitem
         id="menu_hospital_laboratory_root"
         name="Laboratory"
-        sequence="20"/>
+        web_icon="laboratory_management,static/description/icon.png"
+        sequence="25"/>
 
-    <!-- Child Menu -->
+    <!-- Dashboard Menu -->
+    <menuitem
+        id="menu_laboratory_dashboard"
+        name="Dashboard"
+        parent="menu_hospital_laboratory_root"
+        action="action_laboratory_dashboard_server"
+        sequence="1"/>
+
+    <!-- Lab Requests Menu -->
     <menuitem
         id="menu_hospital_laboratory"
         name="Lab Requests"
         parent="menu_hospital_laboratory_root"
         action="action_hospital_laboratory"
+        sequence="2"/>
+
+    <!-- Samples Collection Menu -->
+    <menuitem
+        id="menu_laboratory_sample"
+        name="Sample Collections"
+        parent="menu_hospital_laboratory_root"
+        action="action_laboratory_sample"
+        sequence="3"/>
+
+    <!-- Test Results Menu -->
+    <menuitem
+        id="menu_laboratory_result"
+        name="Test Results"
+        parent="menu_hospital_laboratory_root"
+        action="action_laboratory_result"
+        sequence="4"/>
+
+    <!-- Reports Parent Menu -->
+    <menuitem
+        id="menu_laboratory_reporting"
+        name="Reporting"
+        parent="menu_hospital_laboratory_root"
+        sequence="90"/>
+
+    <menuitem
+        id="menu_laboratory_request_pivot"
+        name="Request Analysis"
+        parent="menu_laboratory_reporting"
+        action="action_laboratory_request_pivot"
         sequence="1"/>
+
+    <menuitem
+        id="menu_laboratory_result_pivot"
+        name="Result Analysis"
+        parent="menu_laboratory_reporting"
+        action="action_laboratory_result_pivot"
+        sequence="2"/>
+
+    <!-- Configuration Parent Menu -->
+    <menuitem
+        id="menu_laboratory_configuration"
+        name="Configuration"
+        parent="menu_hospital_laboratory_root"
+        sequence="100"/>
+
+    <!-- Lab Tests Configuration Menu -->
+    <menuitem
+        id="menu_laboratory_test_catalog"
+        name="Lab Tests"
+        parent="menu_laboratory_configuration"
+        action="action_laboratory_test"
+        sequence="1"/>
+
+    <!-- Lab Equipments Configuration Menu -->
+    <menuitem
+        id="menu_laboratory_equipment_config"
+        name="Equipments"
+        parent="menu_laboratory_configuration"
+        action="action_laboratory_equipment"
+        sequence="2"/>
 
 </odoo>
